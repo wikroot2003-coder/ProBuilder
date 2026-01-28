@@ -1,49 +1,63 @@
 /* eslint-disable react/prop-types */
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Smartphone, Monitor, Image as ImageIcon,
   Download, Loader2, Layout,
   Share2, Grid3X3, Eye, EyeOff,
   Type, Trash2, Bold, Italic, AlignLeft, AlignCenter, AlignRight, Plus, X,
   Palette, PlusCircle, Square, Circle, RectangleHorizontal, Hexagon, MessageSquare,
-  Move, Tablet
+  Move, Tablet, Menu, ChevronLeft, FileImage, FileText
 } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { toPng, toJpeg } from 'html-to-image';
 import { saveAs } from 'file-saver';
+import { jsPDF } from 'jspdf';
 import MultiDevicePreview, { DEVICE_FRAMES } from './MultiDevicePreview';
 
-const HeaderBar = ({ showSafeZone, setShowSafeZone, isExporting, exportProgress, handleExport }) => (
-  <nav className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-50">
-    <div className="flex items-center gap-3">
-      <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-        <Layout className="text-white w-5 h-5" />
+const HeaderBar = ({ showSafeZone, setShowSafeZone, isExporting, exportProgress, onExportClick, onMenuClick, isMobile }) => (
+  <nav className="h-14 sm:h-16 bg-white border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-50">
+    <div className="flex items-center gap-2 sm:gap-3">
+      {isMobile && (
+        <button
+          onClick={onMenuClick}
+          className="p-2 -ml-1 rounded-lg hover:bg-slate-100 transition-colors touch-target-sm"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5 text-slate-600" />
+        </button>
+      )}
+      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+        <Layout className="text-white w-4 h-4 sm:w-5 sm:h-5" />
       </div>
-      <h1 className="font-bold text-xl tracking-tight">KICKS <span className="text-indigo-600">ProBuilder</span></h1>
+      <h1 className="font-bold text-lg sm:text-xl tracking-tight">
+        <span className="hidden sm:inline">KICKS </span>
+        <span className="text-indigo-600">ProBuilder</span>
+      </h1>
     </div>
 
-    <div className="flex items-center gap-4">
-      <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+    <div className="flex items-center gap-2 sm:gap-4">
+      <div className="hidden sm:flex bg-slate-100 p-1 rounded-lg border border-slate-200">
         <button 
           onClick={() => setShowSafeZone(!showSafeZone)}
-          className={`p-1.5 rounded-md transition-all ${showSafeZone ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
+          className={`p-1.5 rounded-md transition-all touch-target-sm ${showSafeZone ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
           title="Toggle Safe Zones"
         >
           {showSafeZone ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
       </div>
       <button 
-        onClick={handleExport}
+        onClick={onExportClick}
         disabled={isExporting}
-        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95 disabled:active:scale-100"
+        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-3 sm:px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95 disabled:active:scale-100"
       >
         {isExporting ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>{exportProgress}</span>
+            <span className="hidden sm:inline">{exportProgress}</span>
           </>
         ) : (
           <>
-            <Download className="w-4 h-4" /> Export Assets
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Export Assets</span>
           </>
         )}
       </button>
@@ -71,12 +85,41 @@ const SidebarControls = ({
   deviceSettings,
   setDeviceSettings,
   onShowImagePanel,
+  isOpen,
+  onClose,
 }) => (
-  <aside className="w-80 bg-white border-r border-slate-200 overflow-y-auto p-5 space-y-8 no-scrollbar z-10 shadow-lg flex-shrink-0">
+  <>
+    {/* Mobile overlay - only render when open */}
+    {isOpen && (
+      <button 
+        type="button"
+        className="fixed inset-0 bg-black/50 z-40 md:hidden border-0 p-0"
+        onClick={onClose}
+        aria-label="Close sidebar"
+      />
+    )}
+    
+    <aside className={`w-72 sm:w-80 bg-white border-r border-slate-200 overflow-y-auto p-4 sm:p-5 space-y-6 sm:space-y-8 no-scrollbar shadow-lg flex-shrink-0
+      md:static md:h-auto md:translate-x-0 md:z-auto
+      fixed top-0 left-0 h-full z-50 transition-transform duration-300 ease-in-out
+      ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+    `}>
+      {/* Mobile close button */}
+      <div className="flex items-center justify-between md:hidden mb-4">
+        <h2 className="font-bold text-lg text-slate-700">Controls</h2>
+        <button
+          onClick={onClose}
+          className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+          aria-label="Close sidebar"
+        >
+          <ChevronLeft className="w-5 h-5 text-slate-600" />
+        </button>
+      </div>
+      
     <div>
       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">1. Content Assets</p>
       <div className="space-y-3">
-        <label className="group relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-all overflow-hidden bg-slate-50">
+        <label className="group relative flex flex-col items-center justify-center w-full h-28 sm:h-32 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-all overflow-hidden bg-slate-50">
           {screenshot ? (
             <>
               <img src={screenshot} className="w-full h-full object-cover opacity-50 blur-sm" alt="Preview" />
@@ -165,28 +208,29 @@ const SidebarControls = ({
         {textElements.length > 0 && (
           <div className="space-y-1 max-h-32 overflow-y-auto">
             {textElements.map((t) => (
-              <button
+              <div
                 key={t.id}
-                type="button"
-                onClick={() => onSelectText(t.id)}
                 className={`w-full flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
                   selectedTextId === t.id ? 'bg-indigo-100 border border-indigo-300' : 'bg-slate-50 hover:bg-slate-100'
                 }`}
               >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => onSelectText(t.id)}
+                  className="flex items-center gap-2 flex-1 min-w-0 bg-transparent border-0 p-0 text-left cursor-pointer"
+                >
                   <Type className="w-3 h-3 text-slate-400 flex-shrink-0" />
                   <span className="text-[11px] font-medium text-slate-600 truncate">{t.content}</span>
-                </div>
-                <span
-                  role="button"
-                  tabIndex={0}
+                </button>
+                <button
+                  type="button"
                   onClick={(e) => { e.stopPropagation(); onDeleteText(t.id); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onDeleteText(t.id); } }}
                   className="p-1 hover:bg-red-100 rounded text-slate-400 hover:text-red-500 transition-colors"
+                  aria-label="Delete text element"
                 >
                   <Trash2 className="w-3 h-3" />
-                </span>
-              </button>
+                </button>
+              </div>
             ))}
           </div>
         )}
@@ -237,6 +281,7 @@ const SidebarControls = ({
                 <span className="text-xs font-bold text-slate-600">PC / Laptop</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
+                <span className="sr-only">Toggle PC Frame visibility</span>
                 <input
                   type="checkbox"
                   checked={deviceSettings?.pc?.visible !== false}
@@ -271,6 +316,7 @@ const SidebarControls = ({
                 <span className="text-xs font-bold text-slate-600">Tablet</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
+                <span className="sr-only">Toggle Tablet Frame visibility</span>
                 <input
                   type="checkbox"
                   checked={deviceSettings?.tablet?.visible !== false}
@@ -305,6 +351,7 @@ const SidebarControls = ({
                 <span className="text-xs font-bold text-slate-600">Smartphone</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
+                <span className="sr-only">Toggle Smartphone Frame visibility</span>
                 <input
                   type="checkbox"
                   checked={deviceSettings?.smartphone?.visible !== false}
@@ -334,14 +381,18 @@ const SidebarControls = ({
       </div>
     )}
   </aside>
+  </>
 );
 
 // Image Settings Panel - shows when image is selected
 const ImageSettingsPanel = ({ imageSettings, setImageSettings, onClose }) => (
-  <div className="w-72 bg-white border-l border-slate-200 p-4 space-y-4 overflow-y-auto flex-shrink-0 shadow-lg">
+  <div className="w-64 sm:w-72 bg-white border-l border-slate-200 p-3 sm:p-4 space-y-4 overflow-y-auto flex-shrink-0 shadow-lg
+    fixed md:relative right-0 top-0 h-full md:h-auto z-50 md:z-10
+    animate-slide-up md:animate-none
+  ">
     <div className="flex items-center justify-between">
       <p className="text-xs font-black text-slate-600 uppercase tracking-wider">Image Settings</p>
-      <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded">
+      <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
         <X className="w-4 h-4 text-slate-400" />
       </button>
     </div>
@@ -420,6 +471,166 @@ const ImageSettingsPanel = ({ imageSettings, setImageSettings, onClose }) => (
   </div>
 );
 
+// Export Format Modal
+const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, exportProgress }) => {
+  const [selectedExportFormat, setSelectedExportFormat] = useState('png');
+  const [jpgQuality, setJpgQuality] = useState(90);
+
+  if (!isOpen) return null;
+
+  const exportFormats = [
+    { id: 'png', label: 'PNG', desc: 'Lossless, transparent background support', icon: FileImage, recommended: true },
+    { id: 'jpg', label: 'JPG', desc: 'Smaller file size, best for photos', icon: FileImage },
+    { id: 'pdf', label: 'PDF', desc: 'Print-ready document format', icon: FileText },
+  ];
+
+  return (
+    <>
+      {/* Backdrop */}
+      <button 
+        type="button"
+        className="fixed inset-0 bg-black/50 z-[100] animate-fade-in border-0 p-0 cursor-default"
+        onClick={onClose}
+        aria-label="Close export modal"
+      />
+      
+      {/* Modal */}
+      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+        <div 
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto animate-scale-in"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-modal-title"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
+            <div>
+              <h2 id="export-modal-title" className="text-lg font-bold text-slate-800">Export Assets</h2>
+              <p className="text-xs text-slate-500 mt-0.5">{selectedFormat.label} • {selectedFormat.w} x {selectedFormat.h}px</p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              disabled={isExporting}
+            >
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-5 space-y-4">
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Format</p>
+              <div className="space-y-2">
+                {exportFormats.map((format) => (
+                  <button
+                    key={format.id}
+                    onClick={() => setSelectedExportFormat(format.id)}
+                    disabled={isExporting}
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-4 ${
+                      selectedExportFormat === format.id 
+                        ? 'border-indigo-600 bg-indigo-50' 
+                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                    } ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      selectedExportFormat === format.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      <format.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold ${selectedExportFormat === format.id ? 'text-indigo-900' : 'text-slate-700'}`}>
+                          {format.label}
+                        </span>
+                        {format.recommended && (
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[9px] font-bold rounded-full">
+                            RECOMMENDED
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{format.desc}</p>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedExportFormat === format.id 
+                        ? 'border-indigo-600 bg-indigo-600' 
+                        : 'border-slate-300'
+                    }`}>
+                      {selectedExportFormat === format.id && (
+                        <div className="w-2 h-2 bg-white rounded-full" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* JPG Quality Slider */}
+            {selectedExportFormat === 'jpg' && (
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex justify-between text-xs font-bold mb-2">
+                  <span className="text-slate-600">Quality</span>
+                  <span className="text-indigo-600">{jpgQuality}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  value={jpgQuality}
+                  onChange={(e) => setJpgQuality(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                  disabled={isExporting}
+                />
+                <p className="text-[10px] text-slate-400 mt-2">
+                  Higher quality = larger file size
+                </p>
+              </div>
+            )}
+
+            {/* Export Progress */}
+            {isExporting && (
+              <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                  <span className="text-sm font-medium text-indigo-700">{exportProgress}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="p-5 border-t border-slate-200 flex gap-3">
+            <button
+              onClick={onClose}
+              disabled={isExporting}
+              className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onExport(selectedExportFormat, jpgQuality)}
+              disabled={isExporting}
+              className="flex-1 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:bg-indigo-400"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Export {selectedExportFormat.toUpperCase()}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 // CanvasTextSection removed - text elements are now fully editable placeholders
 
 const CanvasImageSection = ({ 
@@ -449,62 +660,78 @@ const CanvasImageSection = ({
   }
 
   return (
-  <div
-    role="button"
-    tabIndex={0}
+  <button
+    type="button"
     onMouseDown={onMouseDown}
-    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onMouseDown?.(e); }}
-    className={`absolute flex items-center justify-center select-none
+    onTouchStart={onMouseDown}
+    className={`absolute flex items-center justify-center select-none p-0 bg-transparent border-0
       ${activeLayout === 'overlay' ? 'inset-0 w-full h-full pointer-events-none' : 'cursor-move'}
       ${isDragging || isResizing ? '' : 'transition-all duration-300'}
       ${isSelected && activeLayout !== 'overlay' ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}
-      ${!isSelected && activeLayout !== 'overlay' ? 'hover:ring-2 hover:ring-indigo-300' : ''}
+      ${isSelected || activeLayout === 'overlay' ? '' : 'hover:ring-2 hover:ring-indigo-300'}
     `}
-    style={activeLayout !== 'overlay' ? {
+    style={activeLayout === 'overlay' ? undefined : {
       left: `${imageSettings.x}%`,
       top: `${imageSettings.y}%`,
       transform: 'translate(-50%, -50%)',
       width: `${imageSettings.width}%`,
       height: `${imageSettings.height}%`,
       zIndex: isDragging || isResizing ? 35 : 30,
-    } : undefined}
+    }}
+    aria-label="Drag to move image"
   >
     {/* Resize Handles - only show when selected and not in overlay mode */}
     {isSelected && activeLayout !== 'overlay' && (
       <>
         {/* Corner handles */}
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'nw')}
-          className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-nw-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from top-left corner"
+          className="absolute -top-2 -left-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-nw-resize z-50 hover:bg-indigo-100 transition-colors"
         />
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'ne')}
-          className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-ne-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from top-right corner"
+          className="absolute -top-2 -right-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-ne-resize z-50 hover:bg-indigo-100 transition-colors"
         />
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'sw')}
-          className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-sw-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from bottom-left corner"
+          className="absolute -bottom-2 -left-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-sw-resize z-50 hover:bg-indigo-100 transition-colors"
         />
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'se')}
-          className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-se-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from bottom-right corner"
+          className="absolute -bottom-2 -right-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-se-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         {/* Edge handles */}
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'n')}
-          className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-indigo-500 rounded-full cursor-n-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from top edge"
+          className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-n-resize z-50 hover:bg-indigo-100 transition-colors"
         />
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 's')}
-          className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-indigo-500 rounded-full cursor-s-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from bottom edge"
+          className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-s-resize z-50 hover:bg-indigo-100 transition-colors"
         />
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'w')}
-          className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-indigo-500 rounded-full cursor-w-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from left edge"
+          className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-w-resize z-50 hover:bg-indigo-100 transition-colors"
         />
-        <div
+        <button
+          type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'e')}
-          className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-indigo-500 rounded-full cursor-e-resize z-50 hover:bg-indigo-100 transition-colors"
+          aria-label="Resize from right edge"
+          className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-e-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         {/* Move indicator */}
         <div className="absolute top-2 left-2 bg-indigo-500 text-white p-1.5 rounded-md z-50 pointer-events-none">
@@ -530,7 +757,7 @@ const CanvasImageSection = ({
         </div>
       )}
     </div>
-  </div>
+  </button>
   );
 };
 
@@ -560,10 +787,25 @@ const CanvasArea = ({
   deviceSettings,
   onDeviceSettingsChange,
 }) => {
-  // Calculate scale factor for preview display
+  // Calculate scale factor for preview display - responsive for all devices
   const getPreviewScale = () => {
-    const maxHeight = window.innerHeight * 0.75; // 75vh max - increased for better visibility
-    const maxWidth = window.innerWidth * 0.55; // 55vw max - increased for better visibility
+    const isMobile = globalThis.innerWidth < 768;
+    const isTablet = globalThis.innerWidth >= 768 && globalThis.innerWidth < 1024;
+    
+    // Adjust max dimensions based on device type
+    let maxHeight = globalThis.innerHeight * 0.75;  // 75vh for desktop (default)
+    if (isMobile) {
+      maxHeight = globalThis.innerHeight * 0.5;  // 50vh for mobile
+    } else if (isTablet) {
+      maxHeight = globalThis.innerHeight * 0.6;  // 60vh for tablet
+    }
+        
+    let maxWidth = globalThis.innerWidth * 0.55;  // 55vw for desktop (default)
+    if (isMobile) {
+      maxWidth = globalThis.innerWidth * 0.9;  // 90vw for mobile
+    } else if (isTablet) {
+      maxWidth = globalThis.innerWidth * 0.7;  // 70vw for tablet
+    }
 
     const scaleByWidth = maxWidth / selectedFormat.w;
     const scaleByHeight = maxHeight / selectedFormat.h;
@@ -575,10 +817,18 @@ const CanvasArea = ({
 
   return (
   <main 
-    className="flex-1 bg-slate-100 p-8 md:p-12 overflow-y-auto flex items-center justify-center no-scrollbar relative"
-    onClick={onCanvasClick}
+    className="flex-1 bg-slate-100 p-2 sm:p-4 md:p-8 lg:p-12 overflow-y-auto flex items-center justify-center no-scrollbar relative"
+    aria-label="Canvas preview area"
   >
-    <div className="relative group perspective-1000 transition-all duration-500">
+    {/* Invisible overlay to handle click-to-deselect */}
+    <button
+      type="button"
+      className="absolute inset-0 w-full h-full bg-transparent border-0 cursor-default z-0"
+      onClick={onCanvasClick}
+      aria-label="Click to deselect elements"
+      tabIndex={-1}
+    />
+    <div className="relative group perspective-1000 transition-all duration-500 z-10">
       {/* Format indicator badge with animation */}
       <div
         key={formatChangeKey}
@@ -688,13 +938,12 @@ const CanvasArea = ({
           };
 
           return (
-          <div
+          <button
             key={t.id}
-            role="button"
-            tabIndex={0}
+            type="button"
             onMouseDown={(e) => onTextMouseDown(e, t.id)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectText(t.id); }}
-            className={`absolute cursor-move select-none ${
+            onTouchStart={(e) => onTextMouseDown(e, t.id)}
+            className={`absolute cursor-move select-none border-0 bg-transparent ${
               draggingId === t.id ? '' : 'transition-all'
             } ${
               selectedTextId === t.id ? 'ring-2 ring-indigo-500 ring-offset-2' : 'hover:ring-2 hover:ring-indigo-300'
@@ -721,7 +970,7 @@ const CanvasArea = ({
             {segments.map((seg, idx) => (
               <span key={`${t.id}-seg-${idx}-${seg.text.substring(0, 10)}`} style={{ color: seg.color }}>{seg.text}</span>
             ))}
-          </div>
+          </button>
         )})}
         </div>
       </div>
@@ -738,6 +987,36 @@ const App = () => {
   const [activeLayout, setActiveLayout] = useState('classic');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState('');
+  const [showExportModal, setShowExportModal] = useState(false);
+  
+  // Mobile responsive state
+  const [isMobile, setIsMobile] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(globalThis.innerWidth < 768);
+    };
+    
+    checkMobile();
+    globalThis.addEventListener('resize', checkMobile);
+    
+    return () => globalThis.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    if (isMobile && isSidebarOpen) {
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          setIsSidebarOpen(false);
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isMobile, isSidebarOpen]);
 
   // Text elements state - initialized with default placeholder texts
   // Font sizes are in pixels relative to 1920x1080 export canvas
@@ -902,6 +1181,15 @@ const App = () => {
     setTextElements(textElements.map(t => t.id === id ? { ...t, ...updates } : t));
   };
 
+  // Helper function to update text position during drag
+  const updateTextPosition = (id, deltaXPercent, deltaYPercent) => {
+    setTextElements(prev => prev.map(t => 
+      t.id === id 
+        ? { ...t, x: Math.max(0, Math.min(100, t.x + deltaXPercent)), y: Math.max(0, Math.min(100, t.y + deltaYPercent)) }
+        : t
+    ));
+  };
+
   const deleteTextElement = (id) => {
     setTextElements(textElements.filter(t => t.id !== id));
     if (selectedTextId === id) {
@@ -910,13 +1198,18 @@ const App = () => {
     }
   };
 
+  // Handle both mouse and touch events for text dragging
   const handleTextMouseDown = (e, id) => {
     e.stopPropagation();
     e.preventDefault();
     if (!canvasRef.current) return;
 
+    // Get position from touch or mouse event
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
     setDraggingId(id);
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    dragStartRef.current = { x: clientX, y: clientY };
     setSelectedTextId(id);
     setShowTextPanel(true);
     setIsImageSelected(false); // Deselect image when selecting text
@@ -928,52 +1221,57 @@ const App = () => {
     const handleMouseMove = (e) => {
       if (!canvasRef.current) return;
 
+      // Get position from touch or mouse event
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
       const canvasRect = canvasRef.current.getBoundingClientRect();
-      const deltaX = e.clientX - dragStartRef.current.x;
-      const deltaY = e.clientY - dragStartRef.current.y;
+      const deltaX = clientX - dragStartRef.current.x;
+      const deltaY = clientY - dragStartRef.current.y;
 
       const deltaXPercent = (deltaX / canvasRect.width) * 100;
       const deltaYPercent = (deltaY / canvasRect.height) * 100;
 
-      setTextElements(prev => prev.map(t => {
-        if (t.id === draggingId) {
-          return {
-            ...t,
-            x: Math.max(0, Math.min(100, t.x + deltaXPercent)),
-            y: Math.max(0, Math.min(100, t.y + deltaYPercent))
-          };
-        }
-        return t;
-      }));
+      updateTextPosition(draggingId, deltaXPercent, deltaYPercent);
 
-      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      dragStartRef.current = { x: clientX, y: clientY };
     };
 
     const handleMouseUp = () => {
       setDraggingId(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    // Add both mouse and touch event listeners
+    globalThis.addEventListener('mousemove', handleMouseMove);
+    globalThis.addEventListener('mouseup', handleMouseUp);
+    globalThis.addEventListener('touchmove', handleMouseMove, { passive: false });
+    globalThis.addEventListener('touchend', handleMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      globalThis.removeEventListener('mousemove', handleMouseMove);
+      globalThis.removeEventListener('mouseup', handleMouseUp);
+      globalThis.removeEventListener('touchmove', handleMouseMove);
+      globalThis.removeEventListener('touchend', handleMouseUp);
     };
   }, [draggingId]);
 
   // Image container mouse handlers
+  // Handle both mouse and touch events for image dragging
   const handleImageMouseDown = (e) => {
     e.stopPropagation();
     e.preventDefault();
     if (!canvasRef.current) return;
+
+    // Get position from touch or mouse event
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
     setIsImageSelected(true);
     setIsImageDragging(true);
     setSelectedTextId(null); // Deselect text when selecting image
     setShowTextPanel(false);
     setShowImagePanel(true); // Show image settings panel
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    dragStartRef.current = { x: clientX, y: clientY };
     imageStartRef.current = { ...imageSettings };
   };
 
@@ -982,13 +1280,17 @@ const App = () => {
     e.preventDefault();
     if (!canvasRef.current) return;
 
+    // Get position from touch or mouse event
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
     setIsImageSelected(true);
     setIsImageResizing(true);
     setResizeDirection(direction);
     setSelectedTextId(null);
     setShowTextPanel(false);
     setShowImagePanel(true); // Show image settings panel
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    dragStartRef.current = { x: clientX, y: clientY };
     imageStartRef.current = { ...imageSettings };
   };
 
@@ -1009,9 +1311,13 @@ const App = () => {
     const handleMouseMove = (e) => {
       if (!canvasRef.current) return;
 
+      // Get position from touch or mouse event
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
       const canvasRect = canvasRef.current.getBoundingClientRect();
-      const deltaX = e.clientX - dragStartRef.current.x;
-      const deltaY = e.clientY - dragStartRef.current.y;
+      const deltaX = clientX - dragStartRef.current.x;
+      const deltaY = clientY - dragStartRef.current.y;
 
       const deltaXPercent = (deltaX / canvasRect.width) * 100;
       const deltaYPercent = (deltaY / canvasRect.height) * 100;
@@ -1032,19 +1338,29 @@ const App = () => {
 
         // Handle horizontal resizing
         if (resizeDirection.includes('e')) {
-          newWidth = Math.max(10, Math.min(100, imageStartRef.current.width + deltaXPercent * 2));
+          // Resize from right edge - expand right
+          newWidth = Math.max(10, Math.min(100, imageStartRef.current.width + deltaXPercent));
         }
         if (resizeDirection.includes('w')) {
-          newWidth = Math.max(10, Math.min(100, imageStartRef.current.width - deltaXPercent * 2));
+          // Resize from left edge - expand left, move center left
+          newWidth = Math.max(10, Math.min(100, imageStartRef.current.width - deltaXPercent));
+          newX = imageStartRef.current.x + deltaXPercent / 2;
         }
 
         // Handle vertical resizing
         if (resizeDirection.includes('s')) {
-          newHeight = Math.max(10, Math.min(100, imageStartRef.current.height + deltaYPercent * 2));
+          // Resize from bottom edge - expand down
+          newHeight = Math.max(10, Math.min(100, imageStartRef.current.height + deltaYPercent));
         }
         if (resizeDirection.includes('n')) {
-          newHeight = Math.max(10, Math.min(100, imageStartRef.current.height - deltaYPercent * 2));
+          // Resize from top edge - expand up, move center up
+          newHeight = Math.max(10, Math.min(100, imageStartRef.current.height - deltaYPercent));
+          newY = imageStartRef.current.y + deltaYPercent / 2;
         }
+
+        // Clamp position values
+        newX = Math.max(5, Math.min(95, newX));
+        newY = Math.max(5, Math.min(95, newY));
 
         setImageSettings(prev => ({
           ...prev,
@@ -1062,12 +1378,17 @@ const App = () => {
       setResizeDirection(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    // Add both mouse and touch event listeners
+    globalThis.addEventListener('mousemove', handleMouseMove);
+    globalThis.addEventListener('mouseup', handleMouseUp);
+    globalThis.addEventListener('touchmove', handleMouseMove, { passive: false });
+    globalThis.addEventListener('touchend', handleMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      globalThis.removeEventListener('mousemove', handleMouseMove);
+      globalThis.removeEventListener('mouseup', handleMouseUp);
+      globalThis.removeEventListener('touchmove', handleMouseMove);
+      globalThis.removeEventListener('touchend', handleMouseUp);
     };
   }, [isImageDragging, isImageResizing, resizeDirection]);
   
@@ -1099,7 +1420,7 @@ const App = () => {
     }
   };
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (exportFormat = 'png', jpgQuality = 90) => {
     if (!canvasRef.current) return;
 
     setIsExporting(true);
@@ -1113,20 +1434,61 @@ const App = () => {
 
       setExportProgress('Generating image...');
 
-      // Canvas is already at export size, just capture it
-      const dataUrl = await toPng(canvasRef.current, {
+      const exportOptions = {
         width: selectedFormat.w,
         height: selectedFormat.h,
-        pixelRatio: 1, // Canvas is already at correct size
+        pixelRatio: 1,
         backgroundColor: '#ffffff',
         style: {
-          transform: 'none', // Remove preview scale transform for export
+          transform: 'none',
         }
-      });
+      };
+
+      let dataUrl;
+      let fileExtension;
+
+      if (exportFormat === 'jpg') {
+        dataUrl = await toJpeg(canvasRef.current, {
+          ...exportOptions,
+          quality: jpgQuality / 100,
+        });
+        fileExtension = 'jpg';
+      } else if (exportFormat === 'pdf') {
+        // Generate PNG first, then convert to PDF
+        dataUrl = await toPng(canvasRef.current, exportOptions);
+        
+        setExportProgress('Creating PDF...');
+        
+        // Determine orientation based on dimensions
+        const orientation = selectedFormat.w > selectedFormat.h ? 'landscape' : 'portrait';
+        const pdf = new jsPDF({
+          orientation,
+          unit: 'px',
+          format: [selectedFormat.w, selectedFormat.h],
+        });
+        
+        pdf.addImage(dataUrl, 'PNG', 0, 0, selectedFormat.w, selectedFormat.h);
+        
+        const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.pdf`;
+        pdf.save(fileName);
+        
+        if (wasShowingSafeZone) setShowSafeZone(true);
+        
+        setExportProgress('Done!');
+        setTimeout(() => {
+          setIsExporting(false);
+          setExportProgress('');
+          setShowExportModal(false);
+        }, 1000);
+        return;
+      } else {
+        dataUrl = await toPng(canvasRef.current, exportOptions);
+        fileExtension = 'png';
+      }
 
       setExportProgress('Saving file...');
 
-      const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.png`;
+      const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.${fileExtension}`;
       saveAs(dataUrl, fileName);
 
       if (wasShowingSafeZone) setShowSafeZone(true);
@@ -1135,6 +1497,7 @@ const App = () => {
       setTimeout(() => {
         setIsExporting(false);
         setExportProgress('');
+        setShowExportModal(false);
       }, 1000);
 
     } catch (error) {
@@ -1148,16 +1511,28 @@ const App = () => {
   }, [selectedFormat, showSafeZone]);
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] text-slate-900 font-sans flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-[#f1f5f9] text-slate-900 font-sans flex flex-col overflow-hidden">
       <HeaderBar
         showSafeZone={showSafeZone}
         setShowSafeZone={setShowSafeZone}
         isExporting={isExporting}
         exportProgress={exportProgress}
-        handleExport={handleExport}
+        onExportClick={() => setShowExportModal(true)}
+        onMenuClick={() => setIsSidebarOpen(true)}
+        isMobile={isMobile}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExport}
+        selectedFormat={selectedFormat}
+        isExporting={isExporting}
+        exportProgress={exportProgress}
+      />
+
+      <div className="flex-1 flex overflow-hidden relative">
         <SidebarControls
           screenshot={screenshot}
           handleFileUpload={handleFileUpload}
@@ -1173,11 +1548,13 @@ const App = () => {
           textElements={textElements}
           selectedTextId={selectedTextId}
           onAddText={addTextElement}
-          onSelectText={(id) => { setSelectedTextId(id); setShowTextPanel(true); setShowImagePanel(false); }}
+          onSelectText={(id) => { setSelectedTextId(id); setShowTextPanel(true); setShowImagePanel(false); setIsSidebarOpen(false); }}
           onDeleteText={deleteTextElement}
           deviceSettings={deviceSettings}
           setDeviceSettings={setDeviceSettings}
-          onShowImagePanel={() => { setShowImagePanel(true); setShowTextPanel(false); }}
+          onShowImagePanel={() => { setShowImagePanel(true); setShowTextPanel(false); setIsSidebarOpen(false); }}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
 
         <CanvasArea
@@ -1207,17 +1584,20 @@ const App = () => {
         
         {/* Text Editor Panel */}
         {showTextPanel && selectedText && (
-          <div className="w-72 bg-white border-l border-slate-200 p-4 space-y-4 overflow-y-auto flex-shrink-0 shadow-lg">
+          <div className="w-64 sm:w-72 bg-white border-l border-slate-200 p-3 sm:p-4 space-y-4 overflow-y-auto flex-shrink-0 shadow-lg
+            fixed md:relative right-0 top-0 h-full md:h-auto z-50 md:z-10
+            animate-slide-up md:animate-none
+          ">
             <div className="flex items-center justify-between">
               <p className="text-xs font-black text-slate-600 uppercase tracking-wider">Edit Text</p>
-              <button onClick={() => setShowTextPanel(false)} className="p-1 hover:bg-slate-100 rounded">
+              <button onClick={() => setShowTextPanel(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                 <X className="w-4 h-4 text-slate-400" />
               </button>
             </div>
             
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">Text Segments</label>
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Text Segments</span>
                 <button
                   onClick={() => {
                     const segments = selectedText.segments || [{ text: selectedText.content, color: selectedText.color }];
@@ -1278,8 +1658,9 @@ const App = () => {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Font Size</label>
+                <label htmlFor="text-font-size" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Font Size</label>
                 <input
+                  id="text-font-size"
                   type="number"
                   value={selectedText.fontSize}
                   onChange={(e) => updateTextElement(selectedTextId, { fontSize: Number.parseInt(e.target.value) || 16 })}
@@ -1287,9 +1668,10 @@ const App = () => {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Default Color</label>
+                <label htmlFor="text-default-color" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Default Color</label>
                 <div className="flex items-center gap-1 p-1 border border-slate-200 rounded-lg">
                   <input
+                    id="text-default-color"
                     type="color"
                     value={selectedText.color}
                     onChange={(e) => updateTextElement(selectedTextId, { color: e.target.value })}
@@ -1301,8 +1683,9 @@ const App = () => {
             </div>
             
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Font Family</label>
+              <label htmlFor="text-font-family" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Font Family</label>
               <select
+                id="text-font-family"
                 value={selectedText.fontFamily}
                 onChange={(e) => updateTextElement(selectedTextId, { fontFamily: e.target.value })}
                 className="w-full p-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1336,8 +1719,8 @@ const App = () => {
               </select>
             </div>
             
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Style</label>
+            <fieldset>
+              <legend className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Style</legend>
               <div className="flex gap-1">
                 <button
                   onClick={() => updateTextElement(selectedTextId, { fontWeight: selectedText.fontWeight === 'bold' ? 'normal' : 'bold' })}
@@ -1356,10 +1739,10 @@ const App = () => {
                   <Italic className="w-4 h-4 mx-auto" />
                 </button>
               </div>
-            </div>
+            </fieldset>
             
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Alignment</label>
+            <fieldset>
+              <legend className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Alignment</legend>
               <div className="flex gap-1">
                 <button
                   onClick={() => updateTextElement(selectedTextId, { textAlign: 'left' })}
@@ -1386,12 +1769,13 @@ const App = () => {
                   <AlignRight className="w-4 h-4 mx-auto" />
                 </button>
               </div>
-            </div>
+            </fieldset>
             
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Position X (%)</label>
+                <label htmlFor="text-position-x" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Position X (%)</label>
                 <input
+                  id="text-position-x"
                   type="range"
                   min="0"
                   max="100"
@@ -1401,8 +1785,9 @@ const App = () => {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Position Y (%)</label>
+                <label htmlFor="text-position-y" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Position Y (%)</label>
                 <input
+                  id="text-position-y"
                   type="range"
                   min="0"
                   max="100"
@@ -1420,13 +1805,17 @@ const App = () => {
                   <Square className="w-3 h-3" /> Card Background
                 </label>
                 <button
+                  type="button"
                   onClick={() => updateTextElement(selectedTextId, { cardEnabled: !selectedText.cardEnabled })}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${
-                    selectedText.cardEnabled ? 'bg-indigo-600' : 'bg-slate-200'
+                  className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors ${
+                    selectedText.cardEnabled ? 'bg-indigo-600' : 'bg-slate-300'
                   }`}
+                  role="switch"
+                  aria-checked={selectedText.cardEnabled}
+                  aria-label="Toggle card background"
                 >
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                    selectedText.cardEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                  <span className={`inline-block w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform ${
+                    selectedText.cardEnabled ? 'translate-x-6' : 'translate-x-0.5'
                   }`} />
                 </button>
               </div>
@@ -1434,8 +1823,8 @@ const App = () => {
               {selectedText.cardEnabled && (
                 <div className="space-y-3">
                   {/* Card Shape */}
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shape</label>
+                  <fieldset>
+                    <legend className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shape</legend>
                     <div className="grid grid-cols-3 gap-1">
                       {[
                         { id: 'rectangle', icon: Square, label: 'Rect' },
@@ -1459,14 +1848,15 @@ const App = () => {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
 
                   {/* Card Colors */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fill Color</label>
+                      <label htmlFor="card-fill-color" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fill Color</label>
                       <div className="flex items-center gap-1 p-1 border border-slate-200 rounded-lg">
                         <input
+                          id="card-fill-color"
                           type="color"
                           value={selectedText.cardBgColor || '#ffffff'}
                           onChange={(e) => updateTextElement(selectedTextId, { cardBgColor: e.target.value })}
@@ -1476,9 +1866,10 @@ const App = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Border Color</label>
+                      <label htmlFor="card-border-color" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Border Color</label>
                       <div className="flex items-center gap-1 p-1 border border-slate-200 rounded-lg">
                         <input
+                          id="card-border-color"
                           type="color"
                           value={selectedText.cardBorderColor || '#e2e8f0'}
                           onChange={(e) => updateTextElement(selectedTextId, { cardBorderColor: e.target.value })}
@@ -1492,8 +1883,9 @@ const App = () => {
                   {/* Card Border & Padding */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Border Width</label>
+                      <label htmlFor="card-border-width" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Border Width</label>
                       <input
+                        id="card-border-width"
                         type="range"
                         min="0"
                         max="8"
@@ -1504,8 +1896,9 @@ const App = () => {
                       <span className="text-[9px] text-slate-400">{selectedText.cardBorderWidth || 1}px</span>
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Padding</label>
+                      <label htmlFor="card-padding" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Padding</label>
                       <input
+                        id="card-padding"
                         type="range"
                         min="4"
                         max="48"
@@ -1518,8 +1911,8 @@ const App = () => {
                   </div>
 
                   {/* Card Shadow */}
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shadow</label>
+                  <fieldset>
+                    <legend className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shadow</legend>
                     <div className="flex gap-1">
                       {['none', 'sm', 'md', 'lg', 'xl'].map((shadow) => (
                         <button
@@ -1535,12 +1928,13 @@ const App = () => {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
 
                   {/* Card Opacity */}
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Opacity</label>
+                    <label htmlFor="card-opacity" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Opacity</label>
                     <input
+                      id="card-opacity"
                       type="range"
                       min="10"
                       max="100"

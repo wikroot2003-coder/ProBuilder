@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== RESPONSIVE & MOBILE-FIRST STYLES ===== */
+
+/* Base responsive settings */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Prevent overflow on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Safe area for notched devices (iPhone X+, etc.) */
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Touch optimizations - only for interactive elements */
+button, [role="button"], a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Improve touch targets */
+button, [role="button"], input, select, textarea {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exception for small icon buttons */
+.touch-target-sm {
+  min-height: 32px;
+  min-width: 32px;
+}
+
 /* Custom scrollbar hiding */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -16,12 +53,205 @@
   perspective: 1000px;
 }
 
+/* ===== RESPONSIVE BREAKPOINT UTILITIES ===== */
+
+/* Mobile-first sidebar toggle */
+@media (max-width: 768px) {
+  .sidebar-mobile-hidden {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .sidebar-mobile-visible {
+    transform: translateX(0);
+  }
+  
+  /* Mobile overlay for sidebar */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .sidebar-overlay-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sidebar-tablet {
+    width: 280px;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1280px) {
+  .sidebar-desktop {
+    width: 320px;
+  }
+}
+
+/* ===== MOBILE MENU BUTTON ===== */
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4);
+    z-index: 90;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .mobile-menu-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+  }
+}
+
+/* ===== RESPONSIVE CANVAS PREVIEW ===== */
+@media (max-width: 640px) {
+  .canvas-preview {
+    padding: 1rem;
+  }
+  
+  .canvas-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .canvas-preview {
+    padding: 0.5rem;
+  }
+}
+
+/* ===== RESPONSIVE HEADER ===== */
+@media (max-width: 640px) {
+  .header-title-full {
+    display: none;
+  }
+  
+  .header-title-short {
+    display: block;
+  }
+  
+  .export-btn-text {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .header-title-short {
+    display: none;
+  }
+}
+
+/* ===== RESPONSIVE PANELS ===== */
+@media (max-width: 768px) {
+  .side-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70vh;
+    border-radius: 24px 24px 0 0;
+    z-index: 100;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .side-panel-visible {
+    transform: translateY(0);
+  }
+  
+  /* Panel handle for mobile */
+  .panel-handle {
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+    margin: 8px auto 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .panel-handle {
+    display: none;
+  }
+}
+
+/* ===== TOUCH GESTURES ===== */
+.touch-draggable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.touch-draggable:active {
+  cursor: grabbing;
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY ===== */
+@media (max-width: 640px) {
+  .text-responsive-sm {
+    font-size: 0.75rem;
+  }
+  
+  .text-responsive-base {
+    font-size: 0.875rem;
+  }
+  
+  .text-responsive-lg {
+    font-size: 1rem;
+  }
+}
+
+/* ===== RESPONSIVE GRID ===== */
+@media (max-width: 640px) {
+  .format-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) {
+  .format-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== CUSTOM FORM ELEMENTS ===== */
+
 /* Custom range slider styling */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #4f46e5;
   cursor: pointer;
@@ -30,8 +260,8 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #4f46e5;
   cursor: pointer;
@@ -54,4 +284,71 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 input[type="color"]::-webkit-color-swatch {
   border: none;
   border-radius: 50%;
+}
+
+/* ===== LOADING & ANIMATION ===== */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* ===== LANDSCAPE ORIENTATION ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-compact {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .landscape-hidden {
+    display: none;
+  }
 }

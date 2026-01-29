@@ -23,7 +23,7 @@ body {
 
 /* Touch optimizations - only for interactive elements */
 button, [role="button"], a, input, select, textarea {
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent; 
   touch-action: manipulation;
 }
 

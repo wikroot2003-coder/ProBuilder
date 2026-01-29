@@ -2088,7 +2088,7 @@ const App = () => {
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {(selectedText.segments || [{ text: selectedText.content, color: selectedText.color }]).map((seg, idx) => (
-                  <div key={`segment-editor-${idx}-${seg.text.substring(0, 5)}`} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
+                  <div key={`segment-editor-${idx}`} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
                     <input
                       type="text"
                       value={seg.text}

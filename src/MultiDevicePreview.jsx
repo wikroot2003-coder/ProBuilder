@@ -172,8 +172,9 @@ const DeviceWrapper = ({
   }
   
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={`absolute select-none border-0 bg-transparent p-0
         ${isActive ? '' : 'transition-all duration-150 ease-out'}
         ${isSelected ? 'ring-2 ring-indigo-500 ring-offset-2' : 'hover:ring-2 hover:ring-indigo-300'}
@@ -187,6 +188,12 @@ const DeviceWrapper = ({
         cursor: cursorStyle,
       }}
       onMouseDown={(e) => handleDeviceMouseDown(e, deviceType)}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          handleDeviceMouseDown(e, deviceType);
+        }
+      }}
       aria-label={`${deviceType} device frame`}
     >
       {/* Resize handles */}
@@ -195,6 +202,7 @@ const DeviceWrapper = ({
           <button
             type="button"
             onMouseDown={(e) => handleResizeMouseDown(e, deviceType)}
+            onClick={(e) => e.stopPropagation()}
             className="absolute -bottom-3 -right-3 w-5 h-5 bg-white border-2 border-indigo-500 rounded-full cursor-se-resize z-50 hover:bg-indigo-100 hover:scale-110 transition-transform shadow-md p-0"
             style={{ transform: 'translate(25%, 25%)' }}
             aria-label="Resize bottom-right"
@@ -202,6 +210,7 @@ const DeviceWrapper = ({
           <button
             type="button"
             onMouseDown={(e) => handleResizeMouseDown(e, deviceType)}
+            onClick={(e) => e.stopPropagation()}
             className="absolute -top-3 -right-3 w-5 h-5 bg-white border-2 border-indigo-500 rounded-full cursor-ne-resize z-50 hover:bg-indigo-100 hover:scale-110 transition-transform shadow-md p-0"
             style={{ transform: 'translate(25%, -25%)' }}
             aria-label="Resize top-right"
@@ -209,6 +218,7 @@ const DeviceWrapper = ({
           <button
             type="button"
             onMouseDown={(e) => handleResizeMouseDown(e, deviceType)}
+            onClick={(e) => e.stopPropagation()}
             className="absolute -bottom-3 -left-3 w-5 h-5 bg-white border-2 border-indigo-500 rounded-full cursor-sw-resize z-50 hover:bg-indigo-100 hover:scale-110 transition-transform shadow-md p-0"
             style={{ transform: 'translate(-25%, 25%)' }}
             aria-label="Resize bottom-left"
@@ -216,6 +226,7 @@ const DeviceWrapper = ({
           <button
             type="button"
             onMouseDown={(e) => handleResizeMouseDown(e, deviceType)}
+            onClick={(e) => e.stopPropagation()}
             className="absolute -top-3 -left-3 w-5 h-5 bg-white border-2 border-indigo-500 rounded-full cursor-nw-resize z-50 hover:bg-indigo-100 hover:scale-110 transition-transform shadow-md p-0"
             style={{ transform: 'translate(-25%, -25%)' }}
             aria-label="Resize top-left"
@@ -226,7 +237,7 @@ const DeviceWrapper = ({
         </>
       )}
       {children}
-    </button>
+    </div>
   );
 };
 
@@ -246,7 +257,8 @@ DeviceWrapper.propTypes = {
 const MultiDevicePreview = ({ 
   screenshot = null, 
   deviceSettings = null, 
-  onDeviceSettingsChange = null 
+  onDeviceSettingsChange = null,
+  backgroundSettings = null,
 }) => {
   // Default device settings if not provided
   const defaultSettings = {
@@ -255,7 +267,16 @@ const MultiDevicePreview = ({
     smartphone: { x: 85, y: 60, scale: 100, visible: true, frame: 'iphone' },
   };
 
+  // Default background settings
+  const defaultBgSettings = {
+    type: 'solid',
+    color: '#ffffff',
+    image: null,
+    imageFit: 'cover',
+  };
+
   const settings = deviceSettings || defaultSettings;
+  const bgSettings = backgroundSettings || defaultBgSettings;
   
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [interactionMode, setInteractionMode] = useState(null); // 'drag' or 'resize'
@@ -512,10 +533,63 @@ const MultiDevicePreview = ({
     );
   };
 
+  // Generate background style
+  const getBackgroundStyle = () => {
+    if (bgSettings.type === 'transparent') {
+      return {
+        backgroundColor: 'transparent',
+        backgroundImage: 'repeating-conic-gradient(#e2e8f0 0% 25%, transparent 0% 50%)',
+        backgroundSize: '20px 20px',
+      };
+    }
+    if (bgSettings.type === 'image' && bgSettings.image) {
+      const imageFit = bgSettings.imageFit || 'cover';
+      
+      if (imageFit === 'tile') {
+        return {
+          backgroundImage: `url(${bgSettings.image})`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: 'auto',
+          backgroundPosition: 'top left',
+        };
+      }
+      
+      // For cover, contain, fill
+      const sizeMap = {
+        cover: 'cover',
+        contain: 'contain',
+        fill: '100% 100%',
+      };
+      
+      return {
+        backgroundImage: `url(${bgSettings.image})`,
+        backgroundSize: sizeMap[imageFit] || 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      };
+    }
+    return {
+      backgroundColor: bgSettings.color || '#f1f5f9',
+    };
+  };
+
+  // Handle click on background to deselect
+  const handleBackgroundClick = useCallback(() => {
+    setSelectedDevice(null);
+    setInteractionMode(null);
+  }, []);
+
   return (
     <div 
       ref={containerRef}
-      className="w-full h-full relative"
+      className="w-full h-full relative overflow-hidden"
+      style={getBackgroundStyle()}
+      onMouseDown={(e) => {
+        // Only deselect if clicking directly on background, not on children
+        if (e.target === containerRef.current) {
+          handleBackgroundClick();
+        }
+      }}
     >
       {/* Laptop / PC */}
       {settings.pc.visible && (
@@ -594,6 +668,11 @@ MultiDevicePreview.propTypes = {
     }),
   }),
   onDeviceSettingsChange: PropTypes.func,
+  backgroundSettings: PropTypes.shape({
+    type: PropTypes.oneOf(['solid', 'transparent', 'image']),
+    color: PropTypes.string,
+    image: PropTypes.string,
+  }),
 };
 
 

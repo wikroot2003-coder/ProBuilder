@@ -84,6 +84,8 @@ const SidebarControls = ({
   onDeleteText,
   deviceSettings,
   setDeviceSettings,
+  canvasBg,
+  setCanvasBg,
   onShowImagePanel,
   isOpen,
   onClose,
@@ -268,10 +270,173 @@ const SidebarControls = ({
       </div>
     </div>
 
+    {/* Background Settings - Available for all formats */}
+    <div>
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">6. Background</p>
+      <div className="p-4 bg-slate-50 rounded-2xl space-y-4 border border-slate-100">
+        {/* Background Type Selector */}
+        <div className="grid grid-cols-3 gap-1">
+          <button
+            onClick={() => setCanvasBg(prev => ({ ...prev, type: 'solid' }))}
+            className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+              canvasBg?.type === 'solid'
+                ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+            }`}
+          >
+            Solid
+          </button>
+          <button
+            onClick={() => setCanvasBg(prev => ({ ...prev, type: 'transparent' }))}
+            className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+              canvasBg?.type === 'transparent'
+                ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+            }`}
+          >
+            None
+          </button>
+          <button
+            onClick={() => setCanvasBg(prev => ({ ...prev, type: 'image' }))}
+            className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+              canvasBg?.type === 'image'
+                ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+            }`}
+          >
+            Image
+          </button>
+        </div>
+
+        {/* Solid Color Picker */}
+        {canvasBg?.type === 'solid' && (
+          <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100">
+            <span className="text-xs font-bold text-slate-600">Color</span>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full border-2 border-slate-200 shadow-sm overflow-hidden">
+                <input 
+                  type="color" 
+                  value={canvasBg?.color || '#ffffff'} 
+                  onChange={(e) => setCanvasBg(prev => ({ ...prev, color: e.target.value }))}
+                  className="w-10 h-10 -m-2 cursor-pointer"
+                />
+              </div>
+              <span className="text-xs font-mono text-slate-500">{canvasBg?.color || '#ffffff'}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Transparent Info */}
+        {canvasBg?.type === 'transparent' && (
+          <div className="p-3 bg-white rounded-xl border border-slate-100">
+            <div className="flex items-center gap-2 text-slate-600">
+              <div className="w-6 h-6 rounded bg-[repeating-conic-gradient(#ccc_0_25%,#fff_0_50%)] bg-[length:8px_8px]" />
+              <span className="text-xs font-bold">Transparent Background</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Export will have transparent background (PNG only)
+            </p>
+          </div>
+        )}
+
+        {/* Image Upload */}
+        {canvasBg?.type === 'image' && (
+          <div className="space-y-2">
+            <label className="group relative flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-all overflow-hidden bg-white">
+              {canvasBg?.image ? (
+                <>
+                  <img src={canvasBg.image} className="w-full h-full object-cover opacity-70" alt="Background" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                    <ImageIcon className="w-5 h-5 text-white mb-1" />
+                    <span className="text-[10px] text-white font-bold">Change Image</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="w-6 h-6 text-slate-300 group-hover:text-indigo-500 mb-1" />
+                  <span className="text-[10px] text-slate-500 font-bold">Upload Background</span>
+                  <span className="text-[9px] text-slate-400">PNG, JPG, WEBP</span>
+                </>
+              )}
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (f) => setCanvasBg(prev => ({ ...prev, image: f.target.result }));
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </label>
+            {canvasBg?.image && (
+              <>
+                {/* Image Fit Options */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-slate-600 block">Image Fit</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setCanvasBg(prev => ({ ...prev, imageFit: 'cover' }))}
+                      className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+                        canvasBg?.imageFit === 'cover'
+                          ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                          : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      Cover
+                    </button>
+                    <button
+                      onClick={() => setCanvasBg(prev => ({ ...prev, imageFit: 'contain' }))}
+                      className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+                        canvasBg?.imageFit === 'contain'
+                          ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                          : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      Contain
+                    </button>
+                    <button
+                      onClick={() => setCanvasBg(prev => ({ ...prev, imageFit: 'fill' }))}
+                      className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+                        canvasBg?.imageFit === 'fill'
+                          ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                          : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      Fill
+                    </button>
+                    <button
+                      onClick={() => setCanvasBg(prev => ({ ...prev, imageFit: 'tile' }))}
+                      className={`p-2 rounded-lg border text-[10px] font-bold transition-all ${
+                        canvasBg?.imageFit === 'tile'
+                          ? 'bg-indigo-100 border-indigo-300 text-indigo-600'
+                          : 'border-slate-200 hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      Tile
+                    </button>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCanvasBg(prev => ({ ...prev, image: null }))}
+                  className="w-full p-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                >
+                  Remove Background
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+
     {/* Multi-Device Settings - Only show when Multi-Device format is selected */}
     {selectedFormat.id === 'multi_device' && (
       <div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">6. Device Frames</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">7. Device Frames</p>
         <div className="p-4 bg-slate-50 rounded-2xl space-y-4 border border-slate-100">
           {/* PC Frame Selector */}
           <div className="space-y-2">
@@ -645,6 +810,7 @@ const CanvasImageSection = ({
   onResizeMouseDown,
   deviceSettings,
   onDeviceSettingsChange,
+  canvasBg,
 }) => {
   // For multi_device format, render without wrapper to allow individual device interaction
   if (selectedFormat.id === 'multi_device') {
@@ -654,6 +820,7 @@ const CanvasImageSection = ({
           screenshot={screenshot} 
           deviceSettings={deviceSettings}
           onDeviceSettingsChange={onDeviceSettingsChange}
+          backgroundSettings={canvasBg}
         />
       </div>
     );
@@ -664,6 +831,7 @@ const CanvasImageSection = ({
     type="button"
     onMouseDown={onMouseDown}
     onTouchStart={onMouseDown}
+    onClick={(e) => e.stopPropagation()}
     className={`absolute flex items-center justify-center select-none p-0 bg-transparent border-0
       ${activeLayout === 'overlay' ? 'inset-0 w-full h-full pointer-events-none' : 'cursor-move'}
       ${isDragging || isResizing ? '' : 'transition-all duration-300'}
@@ -687,24 +855,28 @@ const CanvasImageSection = ({
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'nw')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from top-left corner"
           className="absolute -top-2 -left-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-nw-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'ne')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from top-right corner"
           className="absolute -top-2 -right-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-ne-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'sw')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from bottom-left corner"
           className="absolute -bottom-2 -left-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-sw-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'se')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from bottom-right corner"
           className="absolute -bottom-2 -right-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-se-resize z-50 hover:bg-indigo-100 transition-colors"
         />
@@ -712,24 +884,28 @@ const CanvasImageSection = ({
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'n')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from top edge"
           className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-n-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 's')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from bottom edge"
           className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-s-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'w')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from left edge"
           className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-w-resize z-50 hover:bg-indigo-100 transition-colors"
         />
         <button
           type="button"
           onMouseDown={(e) => onResizeMouseDown?.(e, 'e')}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Resize from right edge"
           className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-e-resize z-50 hover:bg-indigo-100 transition-colors"
         />
@@ -786,6 +962,7 @@ const CanvasArea = ({
   onCanvasClick,
   deviceSettings,
   onDeviceSettingsChange,
+  canvasBg,
 }) => {
   // Calculate scale factor for preview display - responsive for all devices
   const getPreviewScale = () => {
@@ -815,19 +992,51 @@ const CanvasArea = ({
 
   const previewScale = getPreviewScale();
 
+  // Generate background style based on canvasBg settings
+  const getCanvasBackgroundStyle = () => {
+    if (!canvasBg) return { backgroundColor: 'white' };
+    
+    if (canvasBg.type === 'transparent') {
+      return {
+        backgroundColor: 'transparent',
+        backgroundImage: 'repeating-conic-gradient(#e2e8f0 0% 25%, transparent 0% 50%)',
+        backgroundSize: '20px 20px',
+      };
+    }
+    if (canvasBg.type === 'image' && canvasBg.image) {
+      const imageFit = canvasBg.imageFit || 'cover';
+      
+      if (imageFit === 'tile') {
+        return {
+          backgroundImage: `url(${canvasBg.image})`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: 'auto',
+          backgroundPosition: 'top left',
+        };
+      }
+      
+      // For cover, contain, fill
+      const sizeMap = {
+        cover: 'cover',
+        contain: 'contain',
+        fill: '100% 100%',
+      };
+      
+      return {
+        backgroundImage: `url(${canvasBg.image})`,
+        backgroundSize: sizeMap[imageFit] || 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      };
+    }
+    return { backgroundColor: canvasBg.color || '#ffffff' };
+  };
+
   return (
   <main 
     className="flex-1 bg-slate-100 p-2 sm:p-4 md:p-8 lg:p-12 overflow-y-auto flex items-center justify-center no-scrollbar relative"
     aria-label="Canvas preview area"
   >
-    {/* Invisible overlay to handle click-to-deselect */}
-    <button
-      type="button"
-      className="absolute inset-0 w-full h-full bg-transparent border-0 cursor-default z-0"
-      onClick={onCanvasClick}
-      aria-label="Click to deselect elements"
-      tabIndex={-1}
-    />
     <div className="relative group perspective-1000 transition-all duration-500 z-10">
       {/* Format indicator badge with animation */}
       <div
@@ -850,9 +1059,10 @@ const CanvasArea = ({
       }}>
         <div
           ref={canvasRef}
+          onMouseDown={onCanvasClick}
           style={{
             borderRadius: `${borderRadius}px`,
-            backgroundColor: 'white',
+            ...getCanvasBackgroundStyle(),
             width: `${selectedFormat.w}px`,
             height: `${selectedFormat.h}px`,
             transform: `scale(${previewScale})`,
@@ -874,7 +1084,8 @@ const CanvasArea = ({
           </div>
         )}
 
-        <div className={`relative z-10 w-full h-full p-4 md:p-6 flex transition-all duration-500
+        <div 
+          className={`relative z-10 w-full h-full p-4 md:p-6 flex transition-all duration-500
           ${activeLayout === 'split' && selectedFormat.id !== 'multi_device' ? 'flex-row items-center gap-4 text-left' : 'flex-col items-center text-center'}
           ${activeLayout === 'overlay' ? 'justify-end' : 'justify-center'}
         `}>
@@ -890,6 +1101,7 @@ const CanvasArea = ({
             onResizeMouseDown={onImageResizeMouseDown}
             deviceSettings={deviceSettings}
             onDeviceSettingsChange={onDeviceSettingsChange}
+            canvasBg={canvasBg}
           />
         </div>
         
@@ -943,6 +1155,7 @@ const CanvasArea = ({
             type="button"
             onMouseDown={(e) => onTextMouseDown(e, t.id)}
             onTouchStart={(e) => onTextMouseDown(e, t.id)}
+            onClick={(e) => e.stopPropagation()}
             className={`absolute cursor-move select-none border-0 bg-transparent ${
               draggingId === t.id ? '' : 'transition-all'
             } ${
@@ -1132,6 +1345,14 @@ const App = () => {
     smartphone: { x: 85, y: 60, scale: 100, visible: true },
   });
 
+  // Canvas background settings (for all formats)
+  const [canvasBg, setCanvasBg] = useState({
+    type: 'solid', // 'solid', 'transparent', 'image'
+    color: '#ffffff',
+    image: null,
+    imageFit: 'cover', // 'cover', 'contain', 'fill', 'tile'
+  });
+
   // Image container interaction state
   const [isImageSelected, setIsImageSelected] = useState(false);
   const [isImageDragging, setIsImageDragging] = useState(false);
@@ -1295,13 +1516,12 @@ const App = () => {
   };
 
   const handleCanvasClick = (e) => {
-    // Only deselect if clicking on the canvas background, not on elements
-    if (e.target === e.currentTarget) {
-      setIsImageSelected(false);
-      setSelectedTextId(null);
-      setShowTextPanel(false);
-      setShowImagePanel(false);
-    }
+    // Deselect all elements when clicking on canvas background
+    // Elements that should remain selected will call stopPropagation
+    setIsImageSelected(false);
+    setSelectedTextId(null);
+    setShowTextPanel(false);
+    setShowImagePanel(false);
   };
 
   // Image dragging/resizing effect
@@ -1552,6 +1772,8 @@ const App = () => {
           onDeleteText={deleteTextElement}
           deviceSettings={deviceSettings}
           setDeviceSettings={setDeviceSettings}
+          canvasBg={canvasBg}
+          setCanvasBg={setCanvasBg}
           onShowImagePanel={() => { setShowImagePanel(true); setShowTextPanel(false); setIsSidebarOpen(false); }}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -1580,6 +1802,7 @@ const App = () => {
           onCanvasClick={handleCanvasClick}
           deviceSettings={deviceSettings}
           onDeviceSettingsChange={setDeviceSettings}
+          canvasBg={canvasBg}
         />
         
         {/* Text Editor Panel */}

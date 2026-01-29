@@ -254,9 +254,10 @@ DeviceWrapper.propTypes = {
 
 
 
-const MultiDevicePreview = ({ 
-  screenshot = null, 
-  deviceSettings = null, 
+const MultiDevicePreview = ({
+  screenshot = null,
+  deviceScreenshots = {},
+  deviceSettings = null,
   onDeviceSettingsChange = null,
   backgroundSettings = null,
 }) => {
@@ -277,6 +278,12 @@ const MultiDevicePreview = ({
 
   const settings = deviceSettings || defaultSettings;
   const bgSettings = backgroundSettings || defaultBgSettings;
+
+  // Helper to get effective screenshot for each device
+  // Priority: device-specific > shared screenshot
+  const getEffectiveScreenshot = (deviceType) => {
+    return deviceScreenshots[deviceType] || screenshot;
+  };
   
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [interactionMode, setInteractionMode] = useState(null); // 'drag' or 'resize'
@@ -442,8 +449,8 @@ const MultiDevicePreview = ({
           {frame.baseStyle === 'imac' && (
             <div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-400 rounded-full z-20"></div>
           )}
-          {screenshot ? (
-            <img src={screenshot} className="w-full h-full object-cover object-top" alt="Screen" draggable={false} />
+          {getEffectiveScreenshot('pc') ? (
+            <img src={getEffectiveScreenshot('pc')} className="w-full h-full object-cover object-top" alt="Screen" draggable={false} />
           ) : (
             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
               <Monitor className="text-slate-600 w-16 h-16 opacity-50" />
@@ -472,8 +479,8 @@ const MultiDevicePreview = ({
         {frameId === 'ipadMini' && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 border-2 border-slate-600 rounded-full z-20"></div>
         )}
-        {screenshot ? (
-          <img src={screenshot} className="w-full h-full object-cover object-top" alt="Tablet Screen" draggable={false} />
+        {getEffectiveScreenshot('tablet') ? (
+          <img src={getEffectiveScreenshot('tablet')} className="w-full h-full object-cover object-top" alt="Tablet Screen" draggable={false} />
         ) : (
           <div className="w-full h-full bg-slate-800 flex items-center justify-center">
             <Tablet className="text-slate-600 w-10 h-10 opacity-50" />
@@ -522,8 +529,8 @@ const MultiDevicePreview = ({
         {frame.homeButton && (
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-8 border-2 border-slate-600 rounded-full z-20"></div>
         )}
-        {screenshot ? (
-          <img src={screenshot} className="w-full h-full object-cover object-top" alt="Phone Screen" draggable={false} />
+        {getEffectiveScreenshot('smartphone') ? (
+          <img src={getEffectiveScreenshot('smartphone')} className="w-full h-full object-cover object-top" alt="Phone Screen" draggable={false} />
         ) : (
           <div className="w-full h-full bg-slate-800 flex items-center justify-center">
             <Smartphone className="text-slate-600 w-8 h-8 opacity-50" />

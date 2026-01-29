@@ -84,6 +84,9 @@ const SidebarControls = ({
   onDeleteText,
   deviceSettings,
   setDeviceSettings,
+  deviceScreenshots,
+  onDeviceFileUpload,
+  onClearDeviceScreenshot,
   canvasBg,
   setCanvasBg,
   onShowImagePanel,
@@ -101,8 +104,8 @@ const SidebarControls = ({
       />
     )}
     
-    <aside className={`w-72 sm:w-80 bg-white border-r border-slate-200 overflow-y-auto p-4 sm:p-5 space-y-6 sm:space-y-8 no-scrollbar shadow-lg flex-shrink-0
-      md:static md:h-auto md:translate-x-0 md:z-auto
+    <aside className={`w-72 sm:w-80 bg-white border-r border-slate-200 overflow-y-auto p-4 sm:p-5 space-y-6 sm:space-y-8 sidebar-scrollbar shadow-lg flex-shrink-0
+      md:static md:h-full md:translate-x-0 md:z-auto
       fixed top-0 left-0 h-full z-50 transition-transform duration-300 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
     `}>
@@ -471,6 +474,39 @@ const SidebarControls = ({
                 <option key={key} value={key}>{frame.name}</option>
               ))}
             </select>
+            {/* PC Device Image Upload */}
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-slate-500">Device Image</span>
+                {deviceScreenshots?.pc && (
+                  <button
+                    onClick={() => onClearDeviceScreenshot('pc')}
+                    className="text-[9px] text-red-500 hover:text-red-600"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <label className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400 transition-colors">
+                {deviceScreenshots?.pc ? (
+                  <>
+                    <img src={deviceScreenshots.pc} className="w-8 h-8 object-cover rounded" alt="" />
+                    <span className="text-[10px] text-slate-600 truncate flex-1">Custom image</span>
+                  </>
+                ) : (
+                  <>
+                    <FileImage className="w-4 h-4 text-slate-400" />
+                    <span className="text-[10px] text-slate-500">Use shared image</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  onChange={(e) => onDeviceFileUpload(e, 'pc')}
+                />
+              </label>
+            </div>
           </div>
 
           {/* Tablet Frame Selector */}
@@ -506,6 +542,39 @@ const SidebarControls = ({
                 <option key={key} value={key}>{frame.name}</option>
               ))}
             </select>
+            {/* Tablet Device Image Upload */}
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-slate-500">Device Image</span>
+                {deviceScreenshots?.tablet && (
+                  <button
+                    onClick={() => onClearDeviceScreenshot('tablet')}
+                    className="text-[9px] text-red-500 hover:text-red-600"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <label className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400 transition-colors">
+                {deviceScreenshots?.tablet ? (
+                  <>
+                    <img src={deviceScreenshots.tablet} className="w-8 h-8 object-cover rounded" alt="" />
+                    <span className="text-[10px] text-slate-600 truncate flex-1">Custom image</span>
+                  </>
+                ) : (
+                  <>
+                    <FileImage className="w-4 h-4 text-slate-400" />
+                    <span className="text-[10px] text-slate-500">Use shared image</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  onChange={(e) => onDeviceFileUpload(e, 'tablet')}
+                />
+              </label>
+            </div>
           </div>
 
           {/* Smartphone Frame Selector */}
@@ -541,6 +610,39 @@ const SidebarControls = ({
                 <option key={key} value={key}>{frame.name}</option>
               ))}
             </select>
+            {/* Smartphone Device Image Upload */}
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-slate-500">Device Image</span>
+                {deviceScreenshots?.smartphone && (
+                  <button
+                    onClick={() => onClearDeviceScreenshot('smartphone')}
+                    className="text-[9px] text-red-500 hover:text-red-600"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <label className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400 transition-colors">
+                {deviceScreenshots?.smartphone ? (
+                  <>
+                    <img src={deviceScreenshots.smartphone} className="w-8 h-8 object-cover rounded" alt="" />
+                    <span className="text-[10px] text-slate-600 truncate flex-1">Custom image</span>
+                  </>
+                ) : (
+                  <>
+                    <FileImage className="w-4 h-4 text-slate-400" />
+                    <span className="text-[10px] text-slate-500">Use shared image</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  onChange={(e) => onDeviceFileUpload(e, 'smartphone')}
+                />
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -640,6 +742,19 @@ const ImageSettingsPanel = ({ imageSettings, setImageSettings, onClose }) => (
 const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, exportProgress }) => {
   const [selectedExportFormat, setSelectedExportFormat] = useState('png');
   const [jpgQuality, setJpgQuality] = useState(90);
+  const [pixelRatio, setPixelRatio] = useState(2);
+
+  const qualityOptions = [
+    { value: 1, label: '1x Standard', desc: 'Smaller file' },
+    { value: 2, label: '2x Retina', desc: 'Recommended' },
+    { value: 3, label: '3x High DPI', desc: 'Maximum quality' },
+  ];
+
+  const MAX_PIXELS = 50_000_000; // ~50MP limit to prevent crashes
+
+  // Calculate if a pixelRatio option would exceed memory limit
+  const getPixelCount = (ratio) => selectedFormat.w * ratio * selectedFormat.h * ratio;
+  const isOptionDisabled = (ratio) => getPixelCount(ratio) > MAX_PIXELS;
 
   if (!isOpen) return null;
 
@@ -752,6 +867,44 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
               </div>
             )}
 
+            {/* Export Resolution/Quality Selector */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex justify-between text-xs font-bold mb-3">
+                <span className="text-slate-600">Export Resolution</span>
+                <span className="text-indigo-600">{selectedFormat.w * pixelRatio} x {selectedFormat.h * pixelRatio}px</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {qualityOptions.map((option) => {
+                  const disabled = isOptionDisabled(option.value);
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => !disabled && setPixelRatio(option.value)}
+                      disabled={isExporting || disabled}
+                      className={`p-2 rounded-lg border text-center transition-all ${
+                        pixelRatio === option.value
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : disabled
+                            ? 'border-slate-200 bg-slate-100 opacity-50 cursor-not-allowed'
+                            : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <span className={`text-xs font-bold block ${pixelRatio === option.value ? 'text-indigo-700' : 'text-slate-700'}`}>
+                        {option.label}
+                      </span>
+                      <span className="text-[9px] text-slate-400">{option.desc}</span>
+                      {disabled && <span className="text-[8px] text-red-500 block">Too large</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {getPixelCount(pixelRatio) > 20_000_000 && !isOptionDisabled(pixelRatio) && (
+                <p className="text-[10px] text-amber-600 mt-2">
+                  Large export - may take longer on some devices
+                </p>
+              )}
+            </div>
+
             {/* Export Progress */}
             {isExporting && (
               <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
@@ -773,7 +926,7 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
               Cancel
             </button>
             <button
-              onClick={() => onExport(selectedExportFormat, jpgQuality)}
+              onClick={() => onExport(selectedExportFormat, jpgQuality, pixelRatio)}
               disabled={isExporting}
               className="flex-1 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:bg-indigo-400"
             >
@@ -798,10 +951,10 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
 
 // CanvasTextSection removed - text elements are now fully editable placeholders
 
-const CanvasImageSection = ({ 
-  activeLayout, 
-  selectedFormat, 
-  screenshot, 
+const CanvasImageSection = ({
+  activeLayout,
+  selectedFormat,
+  screenshot,
   imageSettings,
   isSelected,
   isDragging,
@@ -810,14 +963,16 @@ const CanvasImageSection = ({
   onResizeMouseDown,
   deviceSettings,
   onDeviceSettingsChange,
+  deviceScreenshots,
   canvasBg,
 }) => {
   // For multi_device format, render without wrapper to allow individual device interaction
   if (selectedFormat.id === 'multi_device') {
     return (
       <div className={`absolute inset-0 w-full h-full ${activeLayout === 'overlay' ? 'opacity-80 scale-110' : ''}`}>
-        <MultiDevicePreview 
-          screenshot={screenshot} 
+        <MultiDevicePreview
+          screenshot={screenshot}
+          deviceScreenshots={deviceScreenshots}
           deviceSettings={deviceSettings}
           onDeviceSettingsChange={onDeviceSettingsChange}
           backgroundSettings={canvasBg}
@@ -962,6 +1117,7 @@ const CanvasArea = ({
   onCanvasClick,
   deviceSettings,
   onDeviceSettingsChange,
+  deviceScreenshots,
   canvasBg,
 }) => {
   // Calculate scale factor for preview display - responsive for all devices
@@ -1034,7 +1190,7 @@ const CanvasArea = ({
 
   return (
   <main 
-    className="flex-1 bg-slate-100 p-2 sm:p-4 md:p-8 lg:p-12 overflow-y-auto flex items-center justify-center no-scrollbar relative"
+    className="flex-1 bg-slate-100 p-2 sm:p-4 md:p-8 lg:p-12 overflow-auto flex items-center justify-center canvas-scrollbar relative"
     aria-label="Canvas preview area"
   >
     <div className="relative group perspective-1000 transition-all duration-500 z-10">
@@ -1101,6 +1257,7 @@ const CanvasArea = ({
             onResizeMouseDown={onImageResizeMouseDown}
             deviceSettings={deviceSettings}
             onDeviceSettingsChange={onDeviceSettingsChange}
+            deviceScreenshots={deviceScreenshots}
             canvasBg={canvasBg}
           />
         </div>
@@ -1343,6 +1500,13 @@ const App = () => {
     pc: { x: 50, y: 50, scale: 100, visible: true },
     tablet: { x: 15, y: 55, scale: 100, visible: true },
     smartphone: { x: 85, y: 60, scale: 100, visible: true },
+  });
+
+  // Device-specific screenshots (per-device images)
+  const [deviceScreenshots, setDeviceScreenshots] = useState({
+    pc: null,
+    tablet: null,
+    smartphone: null,
   });
 
   // Canvas background settings (for all formats)
@@ -1640,7 +1804,52 @@ const App = () => {
     }
   };
 
-  const handleExport = useCallback(async (exportFormat = 'png', jpgQuality = 90) => {
+  // Handle device-specific image upload
+  const handleDeviceFileUpload = (e, deviceType) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        setDeviceScreenshots(prev => ({
+          ...prev,
+          [deviceType]: f.target.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Clear device-specific screenshot
+  const clearDeviceScreenshot = (deviceType) => {
+    setDeviceScreenshots(prev => ({
+      ...prev,
+      [deviceType]: null
+    }));
+  };
+
+  // Utility: Wait for fonts and images to be ready before export
+  const waitForResources = async (element, timeout = 3000) => {
+    // Wait for fonts
+    if (document.fonts?.ready) {
+      await Promise.race([
+        document.fonts.ready,
+        new Promise(r => setTimeout(r, timeout))
+      ]);
+    }
+    // Wait for images within the element
+    const images = element.querySelectorAll('img');
+    await Promise.all(Array.from(images).map(img =>
+      img.complete ? Promise.resolve() : new Promise(r => {
+        const timeoutId = setTimeout(r, timeout);
+        img.onload = () => { clearTimeout(timeoutId); r(); };
+        img.onerror = () => { clearTimeout(timeoutId); r(); };
+      })
+    ));
+    // Brief settle time for CSS transitions
+    await new Promise(r => setTimeout(r, 100));
+  };
+
+  const handleExport = useCallback(async (exportFormat = 'png', jpgQuality = 90, pixelRatioValue = 2) => {
     if (!canvasRef.current) return;
 
     setIsExporting(true);
@@ -1650,15 +1859,42 @@ const App = () => {
       const wasShowingSafeZone = showSafeZone;
       if (wasShowingSafeZone) setShowSafeZone(false);
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Wait for React state update
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // Wait for fonts and images to load
+      setExportProgress('Loading resources...');
+      await waitForResources(canvasRef.current);
 
       setExportProgress('Generating image...');
+
+      // Determine background color based on format and user settings
+      const getExportBackgroundColor = () => {
+        // JPG doesn't support transparency - always use solid color
+        if (exportFormat === 'jpg') {
+          return canvasBg?.color || '#ffffff';
+        }
+        // PNG/PDF: respect transparent setting
+        if (canvasBg?.type === 'transparent') {
+          return undefined; // html-to-image preserves transparency
+        }
+        // Solid color
+        if (canvasBg?.type === 'solid') {
+          return canvasBg?.color || '#ffffff';
+        }
+        // Image background - transparent so image shows through
+        if (canvasBg?.type === 'image') {
+          return undefined;
+        }
+        return '#ffffff';
+      };
 
       const exportOptions = {
         width: selectedFormat.w,
         height: selectedFormat.h,
-        pixelRatio: 1,
-        backgroundColor: '#ffffff',
+        pixelRatio: pixelRatioValue,
+        backgroundColor: getExportBackgroundColor(),
+        cacheBust: true,
         style: {
           transform: 'none',
         }
@@ -1722,16 +1958,29 @@ const App = () => {
 
     } catch (error) {
       console.error('Export failed:', error);
-      setExportProgress('Export failed. Try again.');
+
+      // Provide specific error messages
+      let errorMsg = 'Export failed. ';
+      if (error.message?.includes('memory') || error.message?.includes('size') || error.message?.includes('allocation')) {
+        errorMsg += 'Image too large. Try lower resolution.';
+      } else if (error.message?.includes('canvas') || error.message?.includes('taint')) {
+        errorMsg += 'Rendering error. Try a different format.';
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorMsg += 'Failed to load resources. Check connection.';
+      } else {
+        errorMsg += 'Please try again.';
+      }
+
+      setExportProgress(errorMsg);
       setTimeout(() => {
         setIsExporting(false);
         setExportProgress('');
-      }, 2000);
+      }, 3000);
     }
-  }, [selectedFormat, showSafeZone]);
+  }, [selectedFormat, showSafeZone, canvasBg]);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#f1f5f9] text-slate-900 font-sans flex flex-col overflow-hidden">
+    <div className="h-screen h-[100dvh] bg-[#f1f5f9] text-slate-900 font-sans flex flex-col overflow-hidden">
       <HeaderBar
         showSafeZone={showSafeZone}
         setShowSafeZone={setShowSafeZone}
@@ -1772,6 +2021,9 @@ const App = () => {
           onDeleteText={deleteTextElement}
           deviceSettings={deviceSettings}
           setDeviceSettings={setDeviceSettings}
+          deviceScreenshots={deviceScreenshots}
+          onDeviceFileUpload={handleDeviceFileUpload}
+          onClearDeviceScreenshot={clearDeviceScreenshot}
           canvasBg={canvasBg}
           setCanvasBg={setCanvasBg}
           onShowImagePanel={() => { setShowImagePanel(true); setShowTextPanel(false); setIsSidebarOpen(false); }}
@@ -1802,9 +2054,10 @@ const App = () => {
           onCanvasClick={handleCanvasClick}
           deviceSettings={deviceSettings}
           onDeviceSettingsChange={setDeviceSettings}
+          deviceScreenshots={deviceScreenshots}
           canvasBg={canvasBg}
         />
-        
+
         {/* Text Editor Panel */}
         {showTextPanel && selectedText && (
           <div className="w-64 sm:w-72 bg-white border-l border-slate-200 p-3 sm:p-4 space-y-4 overflow-y-auto flex-shrink-0 shadow-lg

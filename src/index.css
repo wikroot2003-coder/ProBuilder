@@ -48,6 +48,58 @@ button, [role="button"], input, select, textarea {
   scrollbar-width: none;
 }
 
+/* Custom styled scrollbar for canvas area */
+.canvas-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.canvas-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.canvas-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.canvas-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.canvas-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Custom styled scrollbar for sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #94a3b8;
+}
+
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
 /* Smooth perspective for 3D effects */
 .perspective-1000 {
   perspective: 1000px;

@@ -92,6 +92,8 @@ const SidebarControls = ({
   onShowImagePanel,
   isOpen,
   onClose,
+  onEditDeviceImage,
+  selectedDevice,
 }) => (
   <>
     {/* Mobile overlay - only render when open */}
@@ -506,6 +508,18 @@ const SidebarControls = ({
                   onChange={(e) => onDeviceFileUpload(e, 'pc')}
                 />
               </label>
+              {/* Edit Image Position Button */}
+              <button
+                onClick={() => onEditDeviceImage('pc')}
+                className={`w-full mt-2 flex items-center justify-center gap-2 p-2 rounded-lg transition-all text-xs font-bold border ${
+                  selectedDevice === 'pc' 
+                    ? 'bg-indigo-100 border-indigo-300 text-indigo-600' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'
+                }`}
+              >
+                <Move className="w-3 h-3" />
+                Edit Image Position
+              </button>
             </div>
           </div>
 
@@ -574,6 +588,18 @@ const SidebarControls = ({
                   onChange={(e) => onDeviceFileUpload(e, 'tablet')}
                 />
               </label>
+              {/* Edit Image Position Button */}
+              <button
+                onClick={() => onEditDeviceImage('tablet')}
+                className={`w-full mt-2 flex items-center justify-center gap-2 p-2 rounded-lg transition-all text-xs font-bold border ${
+                  selectedDevice === 'tablet' 
+                    ? 'bg-indigo-100 border-indigo-300 text-indigo-600' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'
+                }`}
+              >
+                <Move className="w-3 h-3" />
+                Edit Image Position
+              </button>
             </div>
           </div>
 
@@ -642,6 +668,18 @@ const SidebarControls = ({
                   onChange={(e) => onDeviceFileUpload(e, 'smartphone')}
                 />
               </label>
+              {/* Edit Image Position Button */}
+              <button
+                onClick={() => onEditDeviceImage('smartphone')}
+                className={`w-full mt-2 flex items-center justify-center gap-2 p-2 rounded-lg transition-all text-xs font-bold border ${
+                  selectedDevice === 'smartphone' 
+                    ? 'bg-indigo-100 border-indigo-300 text-indigo-600' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'
+                }`}
+              >
+                <Move className="w-3 h-3" />
+                Edit Image Position
+              </button>
             </div>
           </div>
         </div>
@@ -726,6 +764,71 @@ const ImageSettingsPanel = ({ imageSettings, setImageSettings, onClose }) => (
       </div>
     </div>
 
+    {/* Image Pan/Zoom Section */}
+    <div className="p-4 bg-slate-50 rounded-2xl space-y-4 border border-slate-100">
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Image Pan & Zoom</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <div className="flex justify-between text-[10px] font-bold">
+            <span className="text-slate-500">Pan X</span>
+            <span className="text-indigo-600">{imageSettings.objectX ?? 50}%</span>
+          </div>
+          <input
+            type="range" min="0" max="100" value={imageSettings.objectX ?? 50}
+            onChange={(e) => setImageSettings(prev => ({ ...prev, objectX: Number(e.target.value) }))}
+            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          />
+        </div>
+        <div className="space-y-1">
+          <div className="flex justify-between text-[10px] font-bold">
+            <span className="text-slate-500">Pan Y</span>
+            <span className="text-indigo-600">{imageSettings.objectY ?? 0}%</span>
+          </div>
+          <input
+            type="range" min="0" max="100" value={imageSettings.objectY ?? 0}
+            onChange={(e) => setImageSettings(prev => ({ ...prev, objectY: Number(e.target.value) }))}
+            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <div className="flex justify-between text-[10px] font-bold">
+          <span className="text-slate-500">Zoom</span>
+          <span className="text-indigo-600">{imageSettings.zoom ?? 100}%</span>
+        </div>
+        <input
+          type="range" min="50" max="200" value={imageSettings.zoom ?? 100}
+          onChange={(e) => setImageSettings(prev => ({ ...prev, zoom: Number(e.target.value) }))}
+          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+        />
+      </div>
+      <div className="space-y-1">
+        <p className="text-[10px] font-bold text-slate-500">Fit Mode</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setImageSettings(prev => ({ ...prev, fit: 'cover' }))}
+            className={`flex-1 p-2 rounded-lg text-[10px] font-bold transition-all ${
+              (imageSettings.fit || 'cover') === 'cover'
+                ? 'bg-indigo-100 border border-indigo-300 text-indigo-600'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
+            }`}
+          >
+            Cover
+          </button>
+          <button
+            onClick={() => setImageSettings(prev => ({ ...prev, fit: 'contain' }))}
+            className={`flex-1 p-2 rounded-lg text-[10px] font-bold transition-all ${
+              imageSettings.fit === 'contain'
+                ? 'bg-indigo-100 border border-indigo-300 text-indigo-600'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
+            }`}
+          >
+            Contain
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
       <div className="flex items-center gap-2 text-indigo-600">
         <Move className="w-4 h-4" />
@@ -737,6 +840,184 @@ const ImageSettingsPanel = ({ imageSettings, setImageSettings, onClose }) => (
     </div>
   </div>
 );
+
+// Device Image Settings Panel - shows when device is selected for image editing
+const DeviceImageSettingsPanel = ({ 
+  selectedDevice, 
+  deviceImageSettings, 
+  updateDeviceImageSettings, 
+  resetDeviceImageSettings,
+  deviceImageEditMode,
+  setDeviceImageEditMode,
+  deviceScreenshots,
+  screenshot,
+  onClose 
+}) => {
+  if (!selectedDevice) return null;
+  
+  const settings = deviceImageSettings[selectedDevice];
+  const hasImage = deviceScreenshots?.[selectedDevice] || screenshot;
+  
+  const deviceLabels = {
+    pc: { name: 'PC / Laptop', icon: Monitor },
+    tablet: { name: 'Tablet', icon: Tablet },
+    smartphone: { name: 'Smartphone', icon: Smartphone },
+  };
+  
+  const DeviceIcon = deviceLabels[selectedDevice]?.icon || Monitor;
+  
+  return (
+    <div className="w-64 sm:w-72 bg-white border-l border-slate-200 p-3 sm:p-4 space-y-4 overflow-y-auto flex-shrink-0 shadow-lg
+      fixed md:relative right-0 top-0 h-full md:h-auto z-50 md:z-10
+      animate-slide-up md:animate-none
+    ">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <DeviceIcon className="w-4 h-4 text-indigo-600" />
+          <p className="text-xs font-black text-slate-600 uppercase tracking-wider">Edit Image</p>
+        </div>
+        <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+          <X className="w-4 h-4 text-slate-400" />
+        </button>
+      </div>
+      
+      {/* Device indicator */}
+      <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+        <p className="text-xs font-bold text-indigo-700">{deviceLabels[selectedDevice]?.name}</p>
+        <p className="text-[10px] text-indigo-500 mt-0.5">
+          {hasImage ? 'Adjust image position inside device screen' : 'No image uploaded'}
+        </p>
+      </div>
+
+      {/* Edit Mode Toggle */}
+      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Interaction Mode</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setDeviceImageEditMode(false)}
+            className={`flex-1 p-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${
+              deviceImageEditMode === false
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
+            }`}
+          >
+            <Move className="w-3 h-3" />
+            Move Device
+          </button>
+          <button
+            onClick={() => setDeviceImageEditMode(true)}
+            className={`flex-1 p-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${
+              deviceImageEditMode 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
+            }`}
+          >
+            <ImageIcon className="w-3 h-3" />
+            Move Image
+          </button>
+        </div>
+      </div>
+
+      {hasImage ? (
+        <div className="p-4 bg-slate-50 rounded-2xl space-y-4 border border-slate-100">
+          {/* Position X */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px] font-bold">
+              <span className="text-slate-500">Position X</span>
+              <span className="text-indigo-600">{settings.x}%</span>
+            </div>
+            <input
+              type="range" min="0" max="100" value={settings.x}
+              onChange={(e) => updateDeviceImageSettings(selectedDevice, { x: Number(e.target.value) })}
+              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+          </div>
+          
+          {/* Position Y */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px] font-bold">
+              <span className="text-slate-500">Position Y</span>
+              <span className="text-indigo-600">{settings.y}%</span>
+            </div>
+            <input
+              type="range" min="0" max="100" value={settings.y}
+              onChange={(e) => updateDeviceImageSettings(selectedDevice, { y: Number(e.target.value) })}
+              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+          </div>
+          
+          {/* Zoom */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px] font-bold">
+              <span className="text-slate-500">Zoom</span>
+              <span className="text-indigo-600">{settings.zoom}%</span>
+            </div>
+            <input
+              type="range" min="50" max="200" value={settings.zoom}
+              onChange={(e) => updateDeviceImageSettings(selectedDevice, { zoom: Number(e.target.value) })}
+              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+          </div>
+          
+          {/* Fit Mode */}
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-slate-500">Fit Mode</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => updateDeviceImageSettings(selectedDevice, { fit: 'cover' })}
+                className={`flex-1 p-2 rounded-lg text-[10px] font-bold transition-all ${
+                  settings.fit === 'cover' 
+                    ? 'bg-indigo-100 border border-indigo-300 text-indigo-600' 
+                    : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
+                }`}
+              >
+                Cover
+              </button>
+              <button
+                onClick={() => updateDeviceImageSettings(selectedDevice, { fit: 'contain' })}
+                className={`flex-1 p-2 rounded-lg text-[10px] font-bold transition-all ${
+                  settings.fit === 'contain' 
+                    ? 'bg-indigo-100 border border-indigo-300 text-indigo-600' 
+                    : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
+                }`}
+              >
+                Contain
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+          <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-[11px] text-slate-500">Upload an image first to adjust position</p>
+        </div>
+      )}
+
+      {/* Drag hint */}
+      {hasImage && deviceImageEditMode && (
+        <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
+          <div className="flex items-center gap-2 text-amber-600">
+            <Move className="w-4 h-4" />
+            <span className="text-xs font-bold">Drag to Pan</span>
+          </div>
+          <p className="text-[10px] text-amber-500 mt-1">
+            Click and drag on the device screen to reposition the image.
+          </p>
+        </div>
+      )}
+
+      {/* Reset button */}
+      {hasImage && (
+        <button
+          onClick={() => resetDeviceImageSettings(selectedDevice)}
+          className="w-full p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 text-xs font-bold"
+        >
+          Reset to Default
+        </button>
+      )}
+    </div>
+  );
+};
 
 // Export Format Modal
 const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, exportProgress }) => {
@@ -775,13 +1056,15 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
       />
       
       {/* Modal */}
-      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto animate-scale-in"
-          role="dialog"
-          aria-modal="true"
+      <div
+        className="fixed inset-0 z-[101] flex items-center justify-center p-4"
+        style={{ pointerEvents: 'none' }}
+      >
+        <dialog
+          open
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in m-0 p-0 border-0 relative"
+          style={{ pointerEvents: 'auto', position: 'relative', inset: 'unset' }}
           aria-labelledby="export-modal-title"
-          tabIndex={-1}
           onKeyDown={(e) => {
             if (e.key === 'Escape' && !isExporting) {
               onClose();
@@ -947,7 +1230,7 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
               )}
             </button>
           </div>
-        </div>
+        </dialog>
       </div>
     </>
   );
@@ -960,6 +1243,7 @@ const CanvasImageSection = ({
   selectedFormat,
   screenshot,
   imageSettings,
+  setImageSettings,
   isSelected,
   isDragging,
   isResizing,
@@ -969,7 +1253,76 @@ const CanvasImageSection = ({
   onDeviceSettingsChange,
   deviceScreenshots,
   canvasBg,
+  selectedDevice,
+  setSelectedDevice,
+  deviceImageSettings,
+  onDeviceImageSettingsChange,
+  deviceImageEditMode,
+  onDeviceSelect,
 }) => {
+  // State for image pan dragging
+  const [isImagePanning, setIsImagePanning] = useState(false);
+  const imagePanStartRef = useRef({ x: 0, y: 0 });
+  const imageStartSettingsRef = useRef({ objectX: 50, objectY: 0 });
+  const containerRef = useRef(null);
+
+  // Handle image pan mouse down
+  const handleImagePanMouseDown = useCallback((e) => {
+    if (!setImageSettings) return;
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    setIsImagePanning(true);
+    imagePanStartRef.current = { x: clientX, y: clientY };
+    imageStartSettingsRef.current = {
+      objectX: imageSettings.objectX ?? 50,
+      objectY: imageSettings.objectY ?? 0,
+    };
+  }, [imageSettings, setImageSettings]);
+
+  // Effect for image panning
+  useEffect(() => {
+    if (!isImagePanning || !setImageSettings) return;
+
+    const handleMouseMove = (e) => {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // Calculate delta (use fixed sensitivity for consistent feel)
+      const sensitivity = 0.3;
+      const deltaX = (imagePanStartRef.current.x - clientX) * sensitivity;
+      const deltaY = (imagePanStartRef.current.y - clientY) * sensitivity;
+
+      const newX = Math.max(0, Math.min(100, imageStartSettingsRef.current.objectX + deltaX));
+      const newY = Math.max(0, Math.min(100, imageStartSettingsRef.current.objectY + deltaY));
+
+      setImageSettings(prev => ({
+        ...prev,
+        objectX: Math.round(newX),
+        objectY: Math.round(newY),
+      }));
+    };
+
+    const handleMouseUp = () => {
+      setIsImagePanning(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleMouseMove, { passive: false });
+    document.addEventListener('touchend', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleMouseMove);
+      document.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [isImagePanning, setImageSettings]);
   // For multi_device format, render without wrapper to allow individual device interaction
   if (selectedFormat.id === 'multi_device') {
     return (
@@ -980,6 +1333,12 @@ const CanvasImageSection = ({
           deviceSettings={deviceSettings}
           onDeviceSettingsChange={onDeviceSettingsChange}
           backgroundSettings={canvasBg}
+          selectedDevice={selectedDevice}
+          setSelectedDevice={setSelectedDevice}
+          deviceImageSettings={deviceImageSettings}
+          onDeviceImageSettingsChange={onDeviceImageSettingsChange}
+          deviceImageEditMode={deviceImageEditMode}
+          onDeviceSelect={onDeviceSelect}
         />
       </div>
     );
@@ -1076,15 +1435,43 @@ const CanvasImageSection = ({
     )}
     
     <div
+      ref={containerRef}
       style={{ borderRadius: `${imageSettings.borderRadius}px` }}
-      className={`bg-slate-800 shadow-xl overflow-hidden border-2 border-white transform w-full h-full pointer-events-none
-        ${activeLayout === 'overlay' ? 'border-none rounded-none' : ''}
+      className={`bg-slate-800 shadow-xl overflow-hidden border-2 border-white transform w-full h-full
+        ${activeLayout === 'overlay' ? 'border-none rounded-none pointer-events-none' : ''}
       `}
     >
       {screenshot ? (
-        <img src={screenshot} className="w-full h-full object-cover object-top" alt="Screenshot" draggable={false} />
+        <div className="w-full h-full relative">
+          <img
+            src={screenshot}
+            className="w-full h-full pointer-events-none"
+            style={{
+              objectFit: imageSettings.fit || 'cover',
+              objectPosition: `${imageSettings.objectX ?? 50}% ${imageSettings.objectY ?? 0}%`,
+              transform: (imageSettings.zoom && imageSettings.zoom !== 100) ? `scale(${imageSettings.zoom / 100})` : undefined,
+              transformOrigin: `${imageSettings.objectX ?? 50}% ${imageSettings.objectY ?? 0}%`,
+            }}
+            alt="Screenshot"
+            draggable={false}
+          />
+          {/* Pan overlay - show when selected and not in overlay mode */}
+          {isSelected && activeLayout !== 'overlay' && setImageSettings && (
+            <div
+              className={`absolute inset-0 ${isImagePanning ? 'cursor-grabbing' : 'cursor-grab'}`}
+              onMouseDown={handleImagePanMouseDown}
+              onTouchStart={handleImagePanMouseDown}
+            >
+              <div className="absolute inset-0 border-2 border-amber-500 border-dashed pointer-events-none">
+                <div className="absolute bottom-1 right-1 bg-amber-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
+                  Drag to pan image
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 bg-slate-900">
+        <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 bg-slate-900 pointer-events-none">
           <div className="w-8 h-8 bg-white/5 rounded-full flex items-center justify-center mb-2">
             <ImageIcon className="w-4 h-4 opacity-20" />
           </div>
@@ -1110,9 +1497,12 @@ const CanvasArea = ({
   onSelectText,
   onUpdateText,
   onTextMouseDown,
+  onTextResizeMouseDown,
   draggingId,
+  resizingTextId,
   formatChangeKey,
   imageSettings,
+  setImageSettings,
   isImageSelected,
   isImageDragging,
   isImageResizing,
@@ -1123,6 +1513,14 @@ const CanvasArea = ({
   onDeviceSettingsChange,
   deviceScreenshots,
   canvasBg,
+  selectedDevice,
+  setSelectedDevice,
+  deviceImageSettings,
+  onDeviceImageSettingsChange,
+  deviceImageEditMode,
+  onDeviceSelect,
+  zoom = 1,
+  onWheel,
 }) => {
   // Calculate scale factor for preview display - responsive for all devices
   const getPreviewScale = () => {
@@ -1147,7 +1545,8 @@ const CanvasArea = ({
     const scaleByWidth = maxWidth / selectedFormat.w;
     const scaleByHeight = maxHeight / selectedFormat.h;
 
-    return Math.min(scaleByWidth, scaleByHeight, 1); // Never scale up, only down
+    const baseScale = Math.min(scaleByWidth, scaleByHeight, 1); // Never scale up, only down
+    return baseScale * zoom; // Multiply by zoom level
   };
 
   const previewScale = getPreviewScale();
@@ -1193,9 +1592,10 @@ const CanvasArea = ({
   };
 
   return (
-  <main 
+  <main
     className="flex-1 bg-slate-100 p-2 sm:p-4 md:p-8 lg:p-12 overflow-auto flex items-center justify-center canvas-scrollbar relative"
     aria-label="Canvas preview area"
+    onWheel={onWheel}
   >
     <div className="relative group perspective-1000 transition-all duration-500 z-10">
       {/* Format indicator badge with animation */}
@@ -1216,6 +1616,7 @@ const CanvasArea = ({
         overflow: 'hidden',
         borderRadius: `${borderRadius * previewScale}px`,
         boxShadow: '0 40px 100px -20px rgba(0,0,0,0.15)',
+        transition: 'all 0.15s ease-out',
       }}>
         <button
           type="button"
@@ -1228,6 +1629,7 @@ const CanvasArea = ({
             height: `${selectedFormat.h}px`,
             transform: `scale(${previewScale})`,
             transformOrigin: 'top left',
+            transition: 'transform 0.15s ease-out',
           }}
           className="overflow-hidden relative border border-slate-100 p-0 cursor-default"
           aria-label="Canvas area"
@@ -1256,6 +1658,7 @@ const CanvasArea = ({
             selectedFormat={selectedFormat}
             screenshot={screenshot}
             imageSettings={imageSettings}
+            setImageSettings={setImageSettings}
             isSelected={isImageSelected}
             isDragging={isImageDragging}
             isResizing={isImageResizing}
@@ -1265,6 +1668,12 @@ const CanvasArea = ({
             onDeviceSettingsChange={onDeviceSettingsChange}
             deviceScreenshots={deviceScreenshots}
             canvasBg={canvasBg}
+            selectedDevice={selectedDevice}
+            setSelectedDevice={setSelectedDevice}
+            deviceImageSettings={deviceImageSettings}
+            onDeviceImageSettingsChange={onDeviceImageSettingsChange}
+            deviceImageEditMode={deviceImageEditMode}
+            onDeviceSelect={onDeviceSelect}
           />
         </div>
         
@@ -1319,8 +1728,8 @@ const CanvasArea = ({
             onMouseDown={(e) => onTextMouseDown(e, t.id)}
             onTouchStart={(e) => onTextMouseDown(e, t.id)}
             onClick={(e) => e.stopPropagation()}
-            className={`absolute cursor-move select-none border-0 bg-transparent ${
-              draggingId === t.id ? '' : 'transition-all'
+            className={`absolute select-none border-0 bg-transparent ${
+              draggingId === t.id || resizingTextId === t.id ? '' : 'transition-all'
             } ${
               selectedTextId === t.id ? 'ring-2 ring-indigo-500 ring-offset-2' : 'hover:ring-2 hover:ring-indigo-300'
             }`}
@@ -1328,24 +1737,119 @@ const CanvasArea = ({
               left: `${t.x}%`,
               top: `${t.y}%`,
               transform: 'translate(-50%, -50%)',
+              width: `${t.width || 30}%`,
+              height: `${t.height || 10}%`,
               fontSize: `${t.fontSize}px`,
               fontWeight: t.fontWeight,
               fontStyle: t.fontStyle,
               textAlign: t.textAlign,
               fontFamily: t.fontFamily,
-              padding: t.cardEnabled ? undefined : '4px 8px',
+              padding: t.cardEnabled ? undefined : '8px 12px',
               borderRadius: t.cardEnabled ? undefined : '4px',
-              zIndex: draggingId === t.id ? 50 : 40,
+              zIndex: draggingId === t.id || resizingTextId === t.id ? 50 : 40,
               whiteSpace: 'pre-wrap',
-              maxWidth: '80%',
+              wordWrap: 'break-word',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: (() => {
+                if (t.textAlign === 'left') return 'flex-start';
+                if (t.textAlign === 'right') return 'flex-end';
+                return 'center';
+              })(),
               userSelect: 'none',
+              cursor: draggingId === t.id ? 'grabbing' : 'move',
               clipPath: getClipPath(),
+              overflow: 'hidden',
               ...getCardStyles(),
             }}
           >
-            {segments.map((seg, idx) => (
-              <span key={`${t.id}-seg-${idx}-${seg.text.substring(0, 10)}`} style={{ color: seg.color }}>{seg.text}</span>
-            ))}
+            {/* Resize handles - show when text is selected */}
+            {selectedTextId === t.id && (
+              <>
+                {/* Corner handles */}
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'nw')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'nw')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from top-left"
+                  className="absolute -top-2 -left-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-nw-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'ne')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'ne')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from top-right"
+                  className="absolute -top-2 -right-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-ne-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'sw')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'sw')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from bottom-left"
+                  className="absolute -bottom-2 -left-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-sw-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'se')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'se')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from bottom-right"
+                  className="absolute -bottom-2 -right-2 w-4 h-4 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-se-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                {/* Edge handles */}
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'n')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'n')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from top"
+                  className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-n-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 's')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 's')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from bottom"
+                  className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-s-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'w')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'w')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from left"
+                  className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-w-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => onTextResizeMouseDown(e, t.id, 'e')}
+                  onTouchStart={(e) => onTextResizeMouseDown(e, t.id, 'e')}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Resize from right"
+                  className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 p-0 bg-white border-2 border-indigo-500 rounded-full cursor-e-resize z-50 hover:bg-indigo-100 transition-colors"
+                />
+              </>
+            )}
+            {/* Text content with smart positioning */}
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: (() => {
+                if (t.textAlign === 'left') return 'flex-start';
+                if (t.textAlign === 'right') return 'flex-end';
+                return 'center';
+              })(),
+            }}>
+              {segments.map((seg, idx) => (
+                <span key={`${t.id}-seg-${idx}-${seg.text.substring(0, 10)}`} style={{ color: seg.color }}>{seg.text}</span>
+              ))}
+            </div>
           </button>
         )})}
         </button>
@@ -1364,7 +1868,10 @@ const App = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState('');
   const [showExportModal, setShowExportModal] = useState(false);
-  
+
+  // Zoom state for canvas preview
+  const [zoom, setZoom] = useState(1);
+
   // Mobile responsive state
   const [isMobile, setIsMobile] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -1403,6 +1910,8 @@ const App = () => {
       segments: [{ text: 'KICKS', color: '#4f46e5' }],
       x: 50,
       y: 8,
+      width: 30,
+      height: 10,
       fontSize: 72,
       fontWeight: 'bold',
       fontStyle: 'italic',
@@ -1425,6 +1934,8 @@ const App = () => {
       segments: [{ text: 'STEP UP\nYOUR GAME.', color: '#0f172a' }],
       x: 50,
       y: 78,
+      width: 40,
+      height: 12,
       fontSize: 56,
       fontWeight: 'bold',
       fontStyle: 'normal',
@@ -1447,6 +1958,8 @@ const App = () => {
       segments: [{ text: 'Discover our latest collection.', color: '#64748b' }],
       x: 50,
       y: 88,
+      width: 35,
+      height: 8,
       fontSize: 24,
       fontWeight: 'normal',
       fontStyle: 'normal',
@@ -1469,6 +1982,8 @@ const App = () => {
       segments: [{ text: 'EXPLORE', color: '#ffffff' }],
       x: 50,
       y: 95,
+      width: 15,
+      height: 6,
       fontSize: 20,
       fontWeight: 'bold',
       fontStyle: 'normal',
@@ -1490,6 +2005,8 @@ const App = () => {
   const [showTextPanel, setShowTextPanel] = useState(false);
   const [showImagePanel, setShowImagePanel] = useState(false);
   const [draggingId, setDraggingId] = useState(null);
+  const [resizingTextId, setResizingTextId] = useState(null);
+  const [textResizeDirection, setTextResizeDirection] = useState(null);
   const [formatChangeKey, setFormatChangeKey] = useState(0);
 
   // Image container settings
@@ -1499,6 +2016,11 @@ const App = () => {
     width: 85,    // Width (%)
     height: 60,   // Height (%)
     borderRadius: 12, // Border radius (px)
+    // Image pan/zoom within container (like deviceImageSettings)
+    objectX: 50,  // object-position X (%)
+    objectY: 0,   // object-position Y (%)
+    zoom: 100,    // zoom level (%)
+    fit: 'cover', // object-fit: 'cover' or 'contain'
   });
 
   // Multi-device settings
@@ -1528,10 +2050,23 @@ const App = () => {
   const [isImageDragging, setIsImageDragging] = useState(false);
   const [isImageResizing, setIsImageResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState(null);
+  
+  // Device selection state for multi-device format
+  const [selectedDevice, setSelectedDevice] = useState(null);
+
+  // NEW: Device image panel and settings
+  const [showDeviceImagePanel, setShowDeviceImagePanel] = useState(false);
+  const [deviceImageSettings, setDeviceImageSettings] = useState({
+    pc: { x: 50, y: 0, zoom: 100, fit: 'cover' },
+    tablet: { x: 50, y: 0, zoom: 100, fit: 'cover' },
+    smartphone: { x: 50, y: 0, zoom: 100, fit: 'cover' },
+  });
+  const [deviceImageEditMode, setDeviceImageEditMode] = useState(false); // true = edit image position, false = move device
 
   const canvasRef = useRef(null);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const imageStartRef = useRef({ x: 50, y: 45, width: 85, height: 60 });
+  const textStartRef = useRef({ x: 50, y: 50, width: 30, height: 10 });
   const textElementsRef = useRef(textElements);
 
   // Keep ref in sync with state
@@ -1547,6 +2082,8 @@ const App = () => {
       segments: [{ text: 'New Text', color: '#000000' }],
       x: 50,
       y: 50,
+      width: 25,
+      height: 8,
       fontSize: 48, // Larger default for 1920x1080 canvas
       fontWeight: 'bold',
       fontStyle: 'normal',
@@ -1604,6 +2141,7 @@ const App = () => {
     setSelectedTextId(id);
     setShowTextPanel(true);
     setIsImageSelected(false); // Deselect image when selecting text
+    setSelectedDevice(null); // Deselect device when selecting text
   };
 
   React.useEffect(() => {
@@ -1645,6 +2183,86 @@ const App = () => {
       globalThis.removeEventListener('touchend', handleMouseUp);
     };
   }, [draggingId]);
+
+  // Handle text box resize
+  const handleTextResizeMouseDown = (e, id, direction) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const text = textElements.find(t => t.id === id);
+    if (!text || !canvasRef.current) return;
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    setResizingTextId(id);
+    setTextResizeDirection(direction);
+    dragStartRef.current = { x: clientX, y: clientY };
+    textStartRef.current = { 
+      x: text.x, 
+      y: text.y, 
+      width: text.width || 30, 
+      height: text.height || 10 
+    };
+  };
+
+  // Text resizing effect
+  React.useEffect(() => {
+    if (!resizingTextId || !textResizeDirection) return;
+    
+    const handleMouseMove = (e) => {
+      if (!canvasRef.current) return;
+      
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      
+      const rect = canvasRef.current.getBoundingClientRect();
+      const deltaX = ((clientX - dragStartRef.current.x) / rect.width) * 100;
+      const deltaY = ((clientY - dragStartRef.current.y) / rect.height) * 100;
+      
+      setTextElements(prev => prev.map(t => {
+        if (t.id !== resizingTextId) return t;
+        
+        let newWidth = textStartRef.current.width;
+        let newHeight = textStartRef.current.height;
+        let newX = textStartRef.current.x;
+        let newY = textStartRef.current.y;
+        
+        const dir = textResizeDirection;
+        
+        // Handle different resize directions
+        if (dir.includes('e')) newWidth = Math.max(10, textStartRef.current.width + deltaX);
+        if (dir.includes('w')) {
+          newWidth = Math.max(10, textStartRef.current.width - deltaX);
+          newX = textStartRef.current.x + (deltaX / 2);
+        }
+        if (dir.includes('s')) newHeight = Math.max(5, textStartRef.current.height + deltaY);
+        if (dir.includes('n')) {
+          newHeight = Math.max(5, textStartRef.current.height - deltaY);
+          newY = textStartRef.current.y + (deltaY / 2);
+        }
+        
+        return { ...t, width: newWidth, height: newHeight, x: newX, y: newY };
+      }));
+    };
+    
+    const handleMouseUp = () => {
+      setResizingTextId(null);
+      setTextResizeDirection(null);
+    };
+    
+    globalThis.addEventListener('mousemove', handleMouseMove);
+    globalThis.addEventListener('touchmove', handleMouseMove, { passive: false });
+    globalThis.addEventListener('mouseup', handleMouseUp);
+    globalThis.addEventListener('touchend', handleMouseUp);
+    
+    return () => {
+      globalThis.removeEventListener('mousemove', handleMouseMove);
+      globalThis.removeEventListener('touchmove', handleMouseMove);
+      globalThis.removeEventListener('mouseup', handleMouseUp);
+      globalThis.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [resizingTextId, textResizeDirection]);
 
   // Image container mouse handlers
   // Handle both mouse and touch events for image dragging
@@ -1692,6 +2310,7 @@ const App = () => {
     setSelectedTextId(null);
     setShowTextPanel(false);
     setShowImagePanel(false);
+    setSelectedDevice(null); // Deselect device when clicking canvas
   };
 
   // Image dragging/resizing effect
@@ -1801,6 +2420,21 @@ const App = () => {
     setFormatChangeKey(prev => prev + 1);
   }, []);
 
+  // Handle zoom with mouse wheel
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+
+    const zoomStep = 0.05; // Smaller step for smoother zooming
+    const minZoom = 0.5;
+    const maxZoom = 2;
+
+    // Calculate new zoom based on wheel direction
+    const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
+    const newZoom = Math.min(Math.max(zoom + delta, minZoom), maxZoom);
+
+    setZoom(newZoom);
+  }, [zoom]);
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -1833,6 +2467,39 @@ const App = () => {
     }));
   };
 
+  // Open device image edit panel
+  const handleEditDeviceImage = (deviceType) => {
+    setSelectedDevice(deviceType);
+    setShowDeviceImagePanel(true);
+    setDeviceImageEditMode(true);
+    setShowTextPanel(false);
+    setShowImagePanel(false);
+    setIsImageSelected(false);
+    setSelectedTextId(null);
+  };
+
+  // Update device image settings
+  const updateDeviceImageSettings = (deviceType, updates) => {
+    setDeviceImageSettings(prev => ({
+      ...prev,
+      [deviceType]: { ...prev[deviceType], ...updates }
+    }));
+  };
+
+  // Reset device image settings to default
+  const resetDeviceImageSettings = (deviceType) => {
+    setDeviceImageSettings(prev => ({
+      ...prev,
+      [deviceType]: { x: 50, y: 0, zoom: 100, fit: 'cover' }
+    }));
+  };
+
+  // Close device image panel
+  const closeDeviceImagePanel = () => {
+    setShowDeviceImagePanel(false);
+    setDeviceImageEditMode(false);
+  };
+
   // Utility: Create promise for image loading with timeout
   const waitForImage = (img, timeout) => {
     if (img.complete) return Promise.resolve();
@@ -1852,7 +2519,7 @@ const App = () => {
   const waitForResources = async (element, timeout = 3000) => {
     // Wait for fonts
     const fontsReady = document.fonts?.ready;
-    if (fontsReady) {
+    if (fontsReady && fontsReady instanceof Promise) {
       await Promise.race([
         fontsReady,
         new Promise(r => setTimeout(r, timeout))
@@ -1920,9 +2587,19 @@ const App = () => {
     setIsExporting(true);
     setExportProgress('Preparing export...');
 
+    // Save current states before clearing for export
+    const wasShowingSafeZone = showSafeZone;
+    const wasSelectedTextId = selectedTextId;
+    const wasImageSelected = isImageSelected;
+    const wasSelectedDevice = selectedDevice;
+
     try {
-      const wasShowingSafeZone = showSafeZone;
       if (wasShowingSafeZone) setShowSafeZone(false);
+
+      // Clear selection states to remove selection rings/handles from export
+      setSelectedTextId(null);
+      setIsImageSelected(false);
+      setSelectedDevice(null);
 
       // Wait for React state update
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -1972,6 +2649,10 @@ const App = () => {
         const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.pdf`;
         pdf.save(fileName);
 
+        // Restore selection states
+        setSelectedTextId(wasSelectedTextId);
+        setIsImageSelected(wasImageSelected);
+        setSelectedDevice(wasSelectedDevice);
         finalizeExport(wasShowingSafeZone);
         return;
       } else {
@@ -1984,17 +2665,26 @@ const App = () => {
       const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.${fileExtension}`;
       saveAs(dataUrl, fileName);
 
+      // Restore selection states
+      setSelectedTextId(wasSelectedTextId);
+      setIsImageSelected(wasImageSelected);
+      setSelectedDevice(wasSelectedDevice);
       finalizeExport(wasShowingSafeZone);
 
     } catch (error) {
       console.error('Export failed:', error);
+      // Restore all states on error
+      if (wasShowingSafeZone) setShowSafeZone(true);
+      setSelectedTextId(wasSelectedTextId);
+      setIsImageSelected(wasImageSelected);
+      setSelectedDevice(wasSelectedDevice);
       setExportProgress(getExportErrorMessage(error));
       setTimeout(() => {
         setIsExporting(false);
         setExportProgress('');
       }, 3000);
     }
-  }, [selectedFormat, showSafeZone, canvasBg]);
+  }, [selectedFormat, showSafeZone, canvasBg, selectedTextId, isImageSelected, selectedDevice]);
 
   return (
     <div className="h-screen h-[100dvh] bg-[#f1f5f9] text-slate-900 font-sans flex flex-col overflow-hidden">
@@ -2034,7 +2724,7 @@ const App = () => {
           textElements={textElements}
           selectedTextId={selectedTextId}
           onAddText={addTextElement}
-          onSelectText={(id) => { setSelectedTextId(id); setShowTextPanel(true); setShowImagePanel(false); setIsSidebarOpen(false); }}
+          onSelectText={(id) => { setSelectedTextId(id); setShowTextPanel(true); setShowImagePanel(false); setIsSidebarOpen(false); setIsImageSelected(false); setSelectedDevice(null); closeDeviceImagePanel(); }}
           onDeleteText={deleteTextElement}
           deviceSettings={deviceSettings}
           setDeviceSettings={setDeviceSettings}
@@ -2043,9 +2733,11 @@ const App = () => {
           onClearDeviceScreenshot={clearDeviceScreenshot}
           canvasBg={canvasBg}
           setCanvasBg={setCanvasBg}
-          onShowImagePanel={() => { setShowImagePanel(true); setShowTextPanel(false); setIsSidebarOpen(false); }}
+          onShowImagePanel={() => { setShowImagePanel(true); setShowTextPanel(false); setIsSidebarOpen(false); closeDeviceImagePanel(); }}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          onEditDeviceImage={handleEditDeviceImage}
+          selectedDevice={selectedDevice}
         />
 
         <CanvasArea
@@ -2057,12 +2749,15 @@ const App = () => {
           canvasRef={canvasRef}
           textElements={textElements}
           selectedTextId={selectedTextId}
-          onSelectText={(id) => { setSelectedTextId(id); setShowTextPanel(true); setIsImageSelected(false); setShowImagePanel(false); }}
+          onSelectText={(id) => { setSelectedTextId(id); setShowTextPanel(true); setIsImageSelected(false); setShowImagePanel(false); setSelectedDevice(null); }}
           onUpdateText={updateTextElement}
           onTextMouseDown={handleTextMouseDown}
+          onTextResizeMouseDown={handleTextResizeMouseDown}
           draggingId={draggingId}
+          resizingTextId={resizingTextId}
           formatChangeKey={formatChangeKey}
           imageSettings={imageSettings}
+          setImageSettings={setImageSettings}
           isImageSelected={isImageSelected}
           isImageDragging={isImageDragging}
           isImageResizing={isImageResizing}
@@ -2073,6 +2768,14 @@ const App = () => {
           onDeviceSettingsChange={setDeviceSettings}
           deviceScreenshots={deviceScreenshots}
           canvasBg={canvasBg}
+          selectedDevice={selectedDevice}
+          setSelectedDevice={setSelectedDevice}
+          deviceImageSettings={deviceImageSettings}
+          onDeviceImageSettingsChange={updateDeviceImageSettings}
+          deviceImageEditMode={deviceImageEditMode}
+          onDeviceSelect={handleEditDeviceImage}
+          zoom={zoom}
+          onWheel={handleWheel}
         />
 
         {/* Text Editor Panel */}
@@ -2457,6 +3160,21 @@ const App = () => {
             imageSettings={imageSettings}
             setImageSettings={setImageSettings}
             onClose={() => { setIsImageSelected(false); setShowImagePanel(false); }}
+          />
+        )}
+
+        {/* Device Image Settings Panel */}
+        {showDeviceImagePanel && selectedDevice && (
+          <DeviceImageSettingsPanel
+            selectedDevice={selectedDevice}
+            deviceImageSettings={deviceImageSettings}
+            updateDeviceImageSettings={updateDeviceImageSettings}
+            resetDeviceImageSettings={resetDeviceImageSettings}
+            deviceImageEditMode={deviceImageEditMode}
+            setDeviceImageEditMode={setDeviceImageEditMode}
+            deviceScreenshots={deviceScreenshots}
+            screenshot={screenshot}
+            onClose={closeDeviceImagePanel}
           />
         )}
       </div>

@@ -206,7 +206,6 @@ const DeviceWrapper = ({
         cursor: cursorStyle,
       }}
       onMouseDown={(e) => handleDeviceMouseDown(e, deviceType)}
-      onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           handleDeviceMouseDown(e, deviceType);
@@ -280,6 +279,12 @@ const MultiDevicePreview = ({
   onDeviceSettingsChange = null,
   backgroundSettings = null,
   isExporting = false,
+  selectedDevice = null,
+  setSelectedDevice = null,
+  deviceImageSettings = null,
+  onDeviceImageSettingsChange = null,
+  deviceImageEditMode = false,
+  onDeviceSelect = null,
 }) => {
   // Default device settings if not provided
   const defaultSettings = {
@@ -296,8 +301,16 @@ const MultiDevicePreview = ({
     imageFit: 'cover',
   };
 
+  // Default device image settings if not provided
+  const defaultDeviceImageSettings = {
+    pc: { x: 50, y: 0, zoom: 100, fit: 'cover' },
+    tablet: { x: 50, y: 0, zoom: 100, fit: 'cover' },
+    smartphone: { x: 50, y: 0, zoom: 100, fit: 'cover' },
+  };
+
   const settings = deviceSettings || defaultSettings;
   const bgSettings = backgroundSettings || defaultBgSettings;
+  const imgSettings = deviceImageSettings || defaultDeviceImageSettings;
 
   // Helper to get effective screenshot for each device
   // Priority: device-specific > shared screenshot
@@ -305,8 +318,13 @@ const MultiDevicePreview = ({
     return deviceScreenshots[deviceType] || screenshot;
   };
   
-  const [selectedDevice, setSelectedDevice] = useState(null);
+  // selectedDevice and setSelectedDevice now come from props
   const [interactionMode, setInteractionMode] = useState(null); // 'drag' or 'resize'
+  
+  // State for image panning within device screen
+  const [isImagePanning, setIsImagePanning] = useState(false);
+  const imagePanStartRef = useRef({ x: 0, y: 0 });
+  const imageStartSettingsRef = useRef({ x: 50, y: 0 });
   
   const containerRef = useRef(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
@@ -316,22 +334,38 @@ const MultiDevicePreview = ({
   const handleDeviceMouseDown = useCallback((e, deviceType) => {
     e.stopPropagation();
     e.preventDefault();
-    
-    if (!containerRef.current) return;
-    
+
+    if (!containerRef.current || !setSelectedDevice) return;
+
+    // When in image edit mode, only select device (don't start dragging)
+    // This allows user to select a device for image panning without accidentally moving it
+    if (deviceImageEditMode) {
+      setSelectedDevice(deviceType);
+      // Notify parent to open device image panel
+      if (onDeviceSelect) {
+        onDeviceSelect(deviceType);
+      }
+      return;
+    }
+
     const rect = containerRef.current.getBoundingClientRect();
     const mouseXPercent = ((e.clientX - rect.left) / rect.width) * 100;
     const mouseYPercent = ((e.clientY - rect.top) / rect.height) * 100;
-    
+
     // Calculate offset from device center to mouse position
     dragOffsetRef.current = {
       x: mouseXPercent - settings[deviceType].x,
       y: mouseYPercent - settings[deviceType].y
     };
-    
+
     setSelectedDevice(deviceType);
     setInteractionMode('drag');
-  }, [settings]);
+
+    // Notify parent to open device image panel
+    if (onDeviceSelect) {
+      onDeviceSelect(deviceType);
+    }
+  }, [settings, setSelectedDevice, onDeviceSelect, deviceImageEditMode]);
 
   const handleResizeMouseDown = useCallback((e, deviceType) => {
     e.stopPropagation();
@@ -342,7 +376,67 @@ const MultiDevicePreview = ({
     
     setSelectedDevice(deviceType);
     setInteractionMode('resize');
-  }, [settings]);
+  }, [settings, setSelectedDevice]);
+
+  // Handle image panning within device screen
+  const handleImagePanMouseDown = useCallback((e, deviceType) => {
+    if (!deviceImageEditMode || !onDeviceImageSettingsChange) return;
+    
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    setIsImagePanning(true);
+    setSelectedDevice(deviceType);
+    imagePanStartRef.current = { x: clientX, y: clientY };
+    imageStartSettingsRef.current = { 
+      x: imgSettings[deviceType]?.x || 50, 
+      y: imgSettings[deviceType]?.y || 0 
+    };
+  }, [deviceImageEditMode, onDeviceImageSettingsChange, imgSettings, setSelectedDevice]);
+
+  // Effect for image panning
+  useEffect(() => {
+    if (!isImagePanning || !selectedDevice || !deviceImageEditMode) return;
+
+    const handleMouseMove = (e) => {
+      if (!onDeviceImageSettingsChange || !containerRef.current) return;
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // Get container size to calculate proportional movement
+      const rect = containerRef.current.getBoundingClientRect();
+
+      // Calculate delta as percentage of container size (inverted for panning feel)
+      // Moving across 100% of container width/height = 100% position change
+      const deltaX = ((imagePanStartRef.current.x - clientX) / rect.width) * 100;
+      const deltaY = ((imagePanStartRef.current.y - clientY) / rect.height) * 100;
+
+      const newX = Math.max(0, Math.min(100, imageStartSettingsRef.current.x + deltaX));
+      const newY = Math.max(0, Math.min(100, imageStartSettingsRef.current.y + deltaY));
+
+      onDeviceImageSettingsChange(selectedDevice, { x: Math.round(newX), y: Math.round(newY) });
+    };
+
+    const handleMouseUp = () => {
+      setIsImagePanning(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleMouseMove, { passive: false });
+    document.addEventListener('touchend', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleMouseMove);
+      document.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [isImagePanning, selectedDevice, deviceImageEditMode, onDeviceImageSettingsChange]);
 
   useEffect(() => {
     if (!interactionMode || !selectedDevice) return;
@@ -414,6 +508,24 @@ const MultiDevicePreview = ({
     };
   }, [interactionMode, selectedDevice, settings, onDeviceSettingsChange]);
 
+  // Helper to get image style based on device image settings
+  const getImageStyle = (deviceType) => {
+    const imgSetting = imgSettings[deviceType] || { x: 50, y: 0, zoom: 100, fit: 'cover' };
+    const zoom = imgSetting.zoom / 100;
+    
+    return {
+      objectFit: imgSetting.fit,
+      objectPosition: `${imgSetting.x}% ${imgSetting.y}%`,
+      transform: zoom === 1 ? undefined : `scale(${zoom})`,
+      transformOrigin: `${imgSetting.x}% ${imgSetting.y}%`,
+    };
+  };
+
+  // Check if image edit mode is active for a device
+  const isImageEditActive = (deviceType) => {
+    return deviceImageEditMode && selectedDevice === deviceType;
+  };
+
   // Render PC/Laptop device based on frame type
   const renderPCDevice = () => {
     const frameId = settings.pc.frame || 'macbook';
@@ -470,7 +582,27 @@ const MultiDevicePreview = ({
             <div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-400 rounded-full z-20"></div>
           )}
           {getEffectiveScreenshot('pc') ? (
-            <img src={getEffectiveScreenshot('pc')} className="w-full h-full object-cover object-top" alt="Screen" draggable={false} />
+            <div 
+              className={`w-full h-full overflow-hidden relative ${isImageEditActive('pc') ? 'cursor-move' : ''}`}
+              onMouseDown={isImageEditActive('pc') ? (e) => handleImagePanMouseDown(e, 'pc') : undefined}
+              onTouchStart={isImageEditActive('pc') ? (e) => handleImagePanMouseDown(e, 'pc') : undefined}
+              style={{ pointerEvents: isImageEditActive('pc') ? 'auto' : 'none' }}
+            >
+              <img 
+                src={getEffectiveScreenshot('pc')} 
+                className="w-full h-full" 
+                style={getImageStyle('pc')}
+                alt="Screen" 
+                draggable={false} 
+              />
+              {isImageEditActive('pc') && (
+                <div className="absolute inset-0 border-2 border-indigo-500 border-dashed pointer-events-none">
+                  <div className="absolute top-1 left-1 bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
+                    Drag to pan image
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
               <Monitor className="text-slate-600 w-16 h-16 opacity-50" />
@@ -500,7 +632,27 @@ const MultiDevicePreview = ({
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 border-2 border-slate-600 rounded-full z-20"></div>
         )}
         {getEffectiveScreenshot('tablet') ? (
-          <img src={getEffectiveScreenshot('tablet')} className="w-full h-full object-cover object-top" alt="Tablet Screen" draggable={false} />
+          <div 
+            className={`w-full h-full overflow-hidden relative ${isImageEditActive('tablet') ? 'cursor-move' : ''}`}
+            onMouseDown={isImageEditActive('tablet') ? (e) => handleImagePanMouseDown(e, 'tablet') : undefined}
+            onTouchStart={isImageEditActive('tablet') ? (e) => handleImagePanMouseDown(e, 'tablet') : undefined}
+            style={{ pointerEvents: isImageEditActive('tablet') ? 'auto' : 'none' }}
+          >
+            <img 
+              src={getEffectiveScreenshot('tablet')} 
+              className="w-full h-full" 
+              style={getImageStyle('tablet')}
+              alt="Tablet Screen" 
+              draggable={false} 
+            />
+            {isImageEditActive('tablet') && (
+              <div className="absolute inset-0 border-2 border-indigo-500 border-dashed pointer-events-none">
+                <div className="absolute top-1 left-1 bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
+                  Drag to pan image
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="w-full h-full bg-slate-800 flex items-center justify-center">
             <Tablet className="text-slate-600 w-10 h-10 opacity-50" />
@@ -550,7 +702,27 @@ const MultiDevicePreview = ({
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-8 border-2 border-slate-600 rounded-full z-20"></div>
         )}
         {getEffectiveScreenshot('smartphone') ? (
-          <img src={getEffectiveScreenshot('smartphone')} className="w-full h-full object-cover object-top" alt="Phone Screen" draggable={false} />
+          <div 
+            className={`w-full h-full overflow-hidden relative ${isImageEditActive('smartphone') ? 'cursor-move' : ''}`}
+            onMouseDown={isImageEditActive('smartphone') ? (e) => handleImagePanMouseDown(e, 'smartphone') : undefined}
+            onTouchStart={isImageEditActive('smartphone') ? (e) => handleImagePanMouseDown(e, 'smartphone') : undefined}
+            style={{ pointerEvents: isImageEditActive('smartphone') ? 'auto' : 'none' }}
+          >
+            <img 
+              src={getEffectiveScreenshot('smartphone')} 
+              className="w-full h-full" 
+              style={getImageStyle('smartphone')}
+              alt="Phone Screen" 
+              draggable={false} 
+            />
+            {isImageEditActive('smartphone') && (
+              <div className="absolute inset-0 border-2 border-indigo-500 border-dashed pointer-events-none">
+                <div className="absolute top-1 left-1 bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
+                  Drag to pan image
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="w-full h-full bg-slate-800 flex items-center justify-center">
             <Smartphone className="text-slate-600 w-8 h-8 opacity-50" />
@@ -602,9 +774,11 @@ const MultiDevicePreview = ({
 
   // Handle click on background to deselect
   const handleBackgroundClick = useCallback(() => {
-    setSelectedDevice(null);
+    if (setSelectedDevice) {
+      setSelectedDevice(null);
+    }
     setInteractionMode(null);
-  }, []);
+  }, [setSelectedDevice]);
 
   return (
     <div 
@@ -705,6 +879,31 @@ MultiDevicePreview.propTypes = {
     image: PropTypes.string,
   }),
   isExporting: PropTypes.bool,
+  selectedDevice: PropTypes.string,
+  setSelectedDevice: PropTypes.func,
+  deviceImageSettings: PropTypes.shape({
+    pc: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number,
+      zoom: PropTypes.number,
+      fit: PropTypes.oneOf(['cover', 'contain']),
+    }),
+    tablet: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number,
+      zoom: PropTypes.number,
+      fit: PropTypes.oneOf(['cover', 'contain']),
+    }),
+    smartphone: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number,
+      zoom: PropTypes.number,
+      fit: PropTypes.oneOf(['cover', 'contain']),
+    }),
+  }),
+  onDeviceImageSettingsChange: PropTypes.func,
+  deviceImageEditMode: PropTypes.bool,
+  onDeviceSelect: PropTypes.func,
 };
 
 

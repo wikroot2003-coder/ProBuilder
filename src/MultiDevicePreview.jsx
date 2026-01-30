@@ -142,25 +142,26 @@ const DEVICE_FRAMES = {
 };
 
 // Device wrapper component - moved outside parent to avoid re-creation on every render
-const DeviceWrapper = ({ 
-  deviceType, 
-  children, 
-  className, 
-  settings, 
-  selectedDevice, 
+const DeviceWrapper = ({
+  deviceType,
+  children,
+  className,
+  settings,
+  selectedDevice,
   interactionMode,
   handleDeviceMouseDown,
-  handleResizeMouseDown 
+  handleResizeMouseDown,
+  isExporting = false,
 }) => {
   const isSelected = selectedDevice === deviceType;
   const isActive = isSelected && interactionMode;
-  
+
   // Calculate cursor style without nested ternary
   let cursorStyle = 'grab';
   if (interactionMode === 'drag' && isSelected) {
     cursorStyle = 'grabbing';
   }
-  
+
   // Calculate zIndex without nested ternary (S3358 fix)
   let zIndexValue = 10;
   if (isSelected) {
@@ -170,7 +171,24 @@ const DeviceWrapper = ({
   } else if (deviceType === 'tablet') {
     zIndexValue = 20;
   }
-  
+
+  // During export, render without interactive elements
+  if (isExporting) {
+    return (
+      <div
+        className={`absolute select-none border-0 bg-transparent p-0 ${className}`}
+        style={{
+          left: `${settings[deviceType].x}%`,
+          top: `${settings[deviceType].y}%`,
+          transform: `translate(-50%, -50%) scale(${settings[deviceType].scale / 100})`,
+          zIndex: zIndexValue,
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div
       role="button"
@@ -250,6 +268,7 @@ DeviceWrapper.propTypes = {
   interactionMode: PropTypes.string,
   handleDeviceMouseDown: PropTypes.func.isRequired,
   handleResizeMouseDown: PropTypes.func.isRequired,
+  isExporting: PropTypes.bool,
 };
 
 
@@ -260,6 +279,7 @@ const MultiDevicePreview = ({
   deviceSettings = null,
   onDeviceSettingsChange = null,
   backgroundSettings = null,
+  isExporting = false,
 }) => {
   // Default device settings if not provided
   const defaultSettings = {
@@ -598,46 +618,49 @@ const MultiDevicePreview = ({
         }
       }}
     >
-      {/* Laptop / PC */}
-      {settings.pc.visible && (
-        <DeviceWrapper 
-          deviceType="pc" 
+      {/* Laptop / PC - hide during export if no screenshot */}
+      {settings.pc.visible && (!isExporting || getEffectiveScreenshot('pc')) && (
+        <DeviceWrapper
+          deviceType="pc"
           className="rounded-xl"
           settings={settings}
           selectedDevice={selectedDevice}
           interactionMode={interactionMode}
           handleDeviceMouseDown={handleDeviceMouseDown}
           handleResizeMouseDown={handleResizeMouseDown}
+          isExporting={isExporting}
         >
           {renderPCDevice()}
         </DeviceWrapper>
       )}
 
-      {/* Tablet */}
-      {settings.tablet.visible && (
-        <DeviceWrapper 
-          deviceType="tablet" 
+      {/* Tablet - hide during export if no screenshot */}
+      {settings.tablet.visible && (!isExporting || getEffectiveScreenshot('tablet')) && (
+        <DeviceWrapper
+          deviceType="tablet"
           className="rounded-xl"
           settings={settings}
           selectedDevice={selectedDevice}
           interactionMode={interactionMode}
           handleDeviceMouseDown={handleDeviceMouseDown}
           handleResizeMouseDown={handleResizeMouseDown}
+          isExporting={isExporting}
         >
           {renderTabletDevice()}
         </DeviceWrapper>
       )}
 
-      {/* Mobile */}
-      {settings.smartphone.visible && (
-        <DeviceWrapper 
-          deviceType="smartphone" 
+      {/* Mobile - hide during export if no screenshot */}
+      {settings.smartphone.visible && (!isExporting || getEffectiveScreenshot('smartphone')) && (
+        <DeviceWrapper
+          deviceType="smartphone"
           className="rounded-2xl"
           settings={settings}
           selectedDevice={selectedDevice}
           interactionMode={interactionMode}
           handleDeviceMouseDown={handleDeviceMouseDown}
           handleResizeMouseDown={handleResizeMouseDown}
+          isExporting={isExporting}
         >
           {renderSmartphoneDevice()}
         </DeviceWrapper>
@@ -651,6 +674,7 @@ export { DEVICE_FRAMES };
 
 MultiDevicePreview.propTypes = {
   screenshot: PropTypes.string,
+  deviceScreenshots: PropTypes.object,
   deviceSettings: PropTypes.shape({
     pc: PropTypes.shape({
       x: PropTypes.number,
@@ -680,6 +704,7 @@ MultiDevicePreview.propTypes = {
     color: PropTypes.string,
     image: PropTypes.string,
   }),
+  isExporting: PropTypes.bool,
 };
 
 

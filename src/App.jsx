@@ -366,8 +366,8 @@ const SidebarControls = ({
                 className="hidden" 
                 accept="image/png,image/jpeg,image/jpg,image/webp"
                 onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file && file.type.startsWith('image/')) {
+                  const file = e.target.files?.[0];
+                  if (file?.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (f) => setCanvasBg(prev => ({ ...prev, image: f.target.result }));
                     reader.readAsDataURL(file);
@@ -776,11 +776,17 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
       
       {/* Modal */}
       <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
-        <div 
+        <div
           className="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto animate-scale-in"
           role="dialog"
           aria-modal="true"
           aria-labelledby="export-modal-title"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' && !isExporting) {
+              onClose();
+            }
+          }}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-slate-200">
@@ -881,13 +887,11 @@ const ExportModal = ({ isOpen, onClose, onExport, selectedFormat, isExporting, e
                       key={option.value}
                       onClick={() => !disabled && setPixelRatio(option.value)}
                       disabled={isExporting || disabled}
-                      className={`p-2 rounded-lg border text-center transition-all ${
-                        pixelRatio === option.value
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : disabled
-                            ? 'border-slate-200 bg-slate-100 opacity-50 cursor-not-allowed'
-                            : 'border-slate-200 hover:border-slate-300'
-                      }`}
+                      className={(() => {
+                        if (pixelRatio === option.value) return 'p-2 rounded-lg border text-center transition-all border-indigo-500 bg-indigo-50';
+                        if (disabled) return 'p-2 rounded-lg border text-center transition-all border-slate-200 bg-slate-100 opacity-50 cursor-not-allowed';
+                        return 'p-2 rounded-lg border text-center transition-all border-slate-200 hover:border-slate-300';
+                      })()}
                     >
                       <span className={`text-xs font-bold block ${pixelRatio === option.value ? 'text-indigo-700' : 'text-slate-700'}`}>
                         {option.label}
@@ -1213,7 +1217,8 @@ const CanvasArea = ({
         borderRadius: `${borderRadius * previewScale}px`,
         boxShadow: '0 40px 100px -20px rgba(0,0,0,0.15)',
       }}>
-        <div
+        <button
+          type="button"
           ref={canvasRef}
           onMouseDown={onCanvasClick}
           style={{
@@ -1224,7 +1229,8 @@ const CanvasArea = ({
             transform: `scale(${previewScale})`,
             transformOrigin: 'top left',
           }}
-          className="overflow-hidden relative border border-slate-100"
+          className="overflow-hidden relative border border-slate-100 p-0 cursor-default"
+          aria-label="Canvas area"
         >
         {showSafeZone && (
           <div className="absolute inset-0 z-50 pointer-events-none">
@@ -1342,7 +1348,7 @@ const CanvasArea = ({
             ))}
           </button>
         )})}
-        </div>
+        </button>
       </div>
     </div>
   </main>
@@ -1827,26 +1833,85 @@ const App = () => {
     }));
   };
 
+  // Utility: Create promise for image loading with timeout
+  const waitForImage = (img, timeout) => {
+    if (img.complete) return Promise.resolve();
+
+    return new Promise(resolve => {
+      const timeoutId = setTimeout(resolve, timeout);
+      const cleanup = () => {
+        clearTimeout(timeoutId);
+        resolve();
+      };
+      img.onload = cleanup;
+      img.onerror = cleanup;
+    });
+  };
+
   // Utility: Wait for fonts and images to be ready before export
   const waitForResources = async (element, timeout = 3000) => {
     // Wait for fonts
-    if (document.fonts?.ready) {
+    const fontsReady = document.fonts?.ready;
+    if (fontsReady) {
       await Promise.race([
-        document.fonts.ready,
+        fontsReady,
         new Promise(r => setTimeout(r, timeout))
       ]);
     }
     // Wait for images within the element
     const images = element.querySelectorAll('img');
-    await Promise.all(Array.from(images).map(img =>
-      img.complete ? Promise.resolve() : new Promise(r => {
-        const timeoutId = setTimeout(r, timeout);
-        img.onload = () => { clearTimeout(timeoutId); r(); };
-        img.onerror = () => { clearTimeout(timeoutId); r(); };
-      })
-    ));
+    await Promise.all(Array.from(images).map(img => waitForImage(img, timeout)));
     // Brief settle time for CSS transitions
     await new Promise(r => setTimeout(r, 100));
+  };
+
+  // Determine background color based on format and user settings
+  const getExportBackgroundColor = (exportFormat) => {
+    // JPG doesn't support transparency - always use solid color
+    if (exportFormat === 'jpg') {
+      return canvasBg?.color || '#ffffff';
+    }
+    // PNG/PDF: respect transparent setting
+    if (canvasBg?.type === 'transparent') {
+      return undefined; // html-to-image preserves transparency
+    }
+    // Solid color
+    if (canvasBg?.type === 'solid') {
+      return canvasBg?.color || '#ffffff';
+    }
+    // Image background - transparent so image shows through
+    if (canvasBg?.type === 'image') {
+      return undefined;
+    }
+    return '#ffffff';
+  };
+
+  // Generate export error message based on error type
+  const getExportErrorMessage = (error) => {
+    let errorMsg = 'Export failed. ';
+    const message = error.message || '';
+
+    if (message.includes('memory') || message.includes('size') || message.includes('allocation')) {
+      return errorMsg + 'Image too large. Try lower resolution.';
+    }
+    if (message.includes('canvas') || message.includes('taint')) {
+      return errorMsg + 'Rendering error. Try a different format.';
+    }
+    if (message.includes('network') || message.includes('fetch')) {
+      return errorMsg + 'Failed to load resources. Check connection.';
+    }
+    return errorMsg + 'Please try again.';
+  };
+
+  // Finalize export with cleanup
+  const finalizeExport = (wasShowingSafeZone) => {
+    if (wasShowingSafeZone) setShowSafeZone(true);
+    setExportProgress('Done!');
+    setTimeout(() => {
+      setIsExporting(false);
+      setExportProgress('');
+      setShowExportModal(false);
+    }, 1000);
   };
 
   const handleExport = useCallback(async (exportFormat = 'png', jpgQuality = 90, pixelRatioValue = 2) => {
@@ -1868,32 +1933,11 @@ const App = () => {
 
       setExportProgress('Generating image...');
 
-      // Determine background color based on format and user settings
-      const getExportBackgroundColor = () => {
-        // JPG doesn't support transparency - always use solid color
-        if (exportFormat === 'jpg') {
-          return canvasBg?.color || '#ffffff';
-        }
-        // PNG/PDF: respect transparent setting
-        if (canvasBg?.type === 'transparent') {
-          return undefined; // html-to-image preserves transparency
-        }
-        // Solid color
-        if (canvasBg?.type === 'solid') {
-          return canvasBg?.color || '#ffffff';
-        }
-        // Image background - transparent so image shows through
-        if (canvasBg?.type === 'image') {
-          return undefined;
-        }
-        return '#ffffff';
-      };
-
       const exportOptions = {
         width: selectedFormat.w,
         height: selectedFormat.h,
         pixelRatio: pixelRatioValue,
-        backgroundColor: getExportBackgroundColor(),
+        backgroundColor: getExportBackgroundColor(exportFormat),
         cacheBust: true,
         style: {
           transform: 'none',
@@ -1924,18 +1968,11 @@ const App = () => {
         });
         
         pdf.addImage(dataUrl, 'PNG', 0, 0, selectedFormat.w, selectedFormat.h);
-        
+
         const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.pdf`;
         pdf.save(fileName);
-        
-        if (wasShowingSafeZone) setShowSafeZone(true);
-        
-        setExportProgress('Done!');
-        setTimeout(() => {
-          setIsExporting(false);
-          setExportProgress('');
-          setShowExportModal(false);
-        }, 1000);
+
+        finalizeExport(wasShowingSafeZone);
         return;
       } else {
         dataUrl = await toPng(canvasRef.current, exportOptions);
@@ -1947,31 +1984,11 @@ const App = () => {
       const fileName = `kicks-${selectedFormat.label.toLowerCase().replaceAll('/', '-').replaceAll(' ', '-')}-${Date.now()}.${fileExtension}`;
       saveAs(dataUrl, fileName);
 
-      if (wasShowingSafeZone) setShowSafeZone(true);
-
-      setExportProgress('Done!');
-      setTimeout(() => {
-        setIsExporting(false);
-        setExportProgress('');
-        setShowExportModal(false);
-      }, 1000);
+      finalizeExport(wasShowingSafeZone);
 
     } catch (error) {
       console.error('Export failed:', error);
-
-      // Provide specific error messages
-      let errorMsg = 'Export failed. ';
-      if (error.message?.includes('memory') || error.message?.includes('size') || error.message?.includes('allocation')) {
-        errorMsg += 'Image too large. Try lower resolution.';
-      } else if (error.message?.includes('canvas') || error.message?.includes('taint')) {
-        errorMsg += 'Rendering error. Try a different format.';
-      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
-        errorMsg += 'Failed to load resources. Check connection.';
-      } else {
-        errorMsg += 'Please try again.';
-      }
-
-      setExportProgress(errorMsg);
+      setExportProgress(getExportErrorMessage(error));
       setTimeout(() => {
         setIsExporting(false);
         setExportProgress('');
@@ -2088,7 +2105,7 @@ const App = () => {
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {(selectedText.segments || [{ text: selectedText.content, color: selectedText.color }]).map((seg, idx) => (
-                  <div key={`segment-editor-${idx}`} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
+                  <div key={`segment-${selectedTextId}-${idx}-${seg.text.substring(0, 10)}`} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
                     <input
                       type="text"
                       value={seg.text}

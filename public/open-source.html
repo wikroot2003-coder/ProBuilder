@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Source Notices | KICKS ProBuilder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Prompt:wght@400;500;600&family=Sarabun:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --accent: #4f46e5;
+        --notice-bg: #fef3c7;
+        --notice-border: #f59e0b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Kanit", "Prompt", "Sarabun", system-ui, sans-serif;
+        background: #f8fafc;
+        color: var(--text);
+        line-height: 1.7;
+      }
+      main {
+        max-width: 920px;
+        margin: 32px auto 64px;
+        padding: 32px 28px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 24px 48px -42px rgba(15, 23, 42, 0.4);
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .eyebrow {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+      }
+      h1 {
+        font-size: 2.1rem;
+        margin: 0;
+      }
+      h2 {
+        margin: 24px 0 8px;
+        font-size: 1.2rem;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .notice {
+        background: var(--notice-bg);
+        border: 1px dashed var(--notice-border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+      }
+      .placeholder {
+        color: #92400e;
+        font-weight: 600;
+      }
+      ul {
+        padding-left: 20px;
+        margin: 8px 0 0;
+      }
+      footer {
+        margin-top: 32px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      @media (max-width: 600px) {
+        main {
+          margin: 0;
+          border-radius: 0;
+          border: none;
+          padding: 28px 20px 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="eyebrow">KICKS ProBuilder</span>
+        <h1>Open Source & Third‑Party Notices</h1>
+        <div class="meta">อัปเดตล่าสุด: <span class="placeholder">[วันที่]</span> (แนะนำใส่วันที่จริง)</div>
+        <div class="meta">
+          <a href="./privacy.html">Privacy</a> •
+          <a href="./terms.html">Terms</a> •
+          <a href="./open-source.html">Open Source</a>
+        </div>
+        <div class="meta"><a href="./">← กลับหน้าแอป</a></div>
+      </header>
+
+      <div class="notice">
+        หน้านี้รวบรวมรายการซอฟต์แวร์โอเพ่นซอร์สและบุคคลที่สามที่ใช้ในบริการ กรุณาตรวจสอบและเติมรายละเอียด license ตามจริงก่อนเผยแพร่
+        โดยเฉพาะหากคุณมีการแก้ไข/เพิ่ม dependency หรือมีข้อกำหนดการให้เครดิต (Attribution)
+      </div>
+
+      <section>
+        <h2>1) ไลบรารีหลักที่ใช้งาน</h2>
+        <ul>
+          <li>React</li>
+          <li>React DOM</li>
+          <li>Vite</li>
+          <li>Tailwind CSS</li>
+          <li>Lucide React</li>
+          <li>html-to-image</li>
+          <li>jsPDF</li>
+          <li>file-saver</li>
+        </ul>
+        <p>
+          แต่ละโครงการมีสัญญาอนุญาต (License) ของตนเอง โปรดตรวจสอบจากเว็บไซต์หรือไฟล์ LICENSE ของแต่ละโครงการ
+        </p>
+        <p>
+          หากมีความขัดแย้งระหว่างข้อความในหน้านี้กับเงื่อนไข License ของซอฟต์แวร์บุคคลที่สาม ให้ถือว่าเงื่อนไข License ของบุคคลที่สาม
+          มีผลเหนือกว่าเฉพาะในส่วนที่เกี่ยวข้อง
+        </p>
+      </section>
+
+      <section>
+        <h2>2) แบบอักษรและทรัพยากรภายนอก</h2>
+        <p>
+          บริการนี้โหลดแบบอักษรจาก Google Fonts (fonts.googleapis.com และ fonts.gstatic.com)
+          ซึ่งอยู่ภายใต้เงื่อนไขการใช้งานของ Google Fonts และสัญญาอนุญาตของแบบอักษรแต่ละชุด
+        </p>
+      </section>
+
+      <section>
+        <p><strong>3. ไลเซนส์ของซอฟต์แวร์นี้</strong></p>
+        <p>โปรเจคนี้อยู่ภายใต้ <strong>All Rights Reserved</strong> ไม่มีการอนุญาตให้ใช้งาน คัดลอก ดัดแปลง หรือแจกจ่ายโดยไม่ได้รับอนุญาตจากเจ้าของลิขสิทธิ์</p>
+      </section>
+
+      <section>
+        <h2>4) เนื้อหาของผู้ใช้</h2>
+        <p>
+          หน้านี้เกี่ยวข้องกับซอฟต์แวร์โอเพ่นซอร์ส/บุคคลที่สามเท่านั้น ไม่ได้ให้สิทธิ์แก่คุณในการใช้รูปภาพ โลโก้ เครื่องหมายการค้า
+          ฟอนต์ หรือทรัพย์สินทางปัญญาของบุคคลที่สามที่คุณนำเข้าไปใช้ในงานของคุณ
+        </p>
+        <p>
+          ผู้ใช้เป็นผู้รับผิดชอบต่อการขออนุญาตและการใช้งานคอนเทนต์ของบุคคลที่สามทั้งหมด ตามที่ระบุในข้อตกลงการใช้งาน
+        </p>
+      </section>
+
+      <section>
+        <h2>5) ติดต่อ</h2>
+        <p>
+          หากมีคำถามเกี่ยวกับรายการโอเพ่นซอร์สหรือการให้เครดิต โปรดติดต่อ <span class="placeholder">[อีเมลติดต่อ]</span>
+        </p>
+      </section>
+
+      <footer>
+        หากคุณอัปเดต dependency โปรดอัปเดตรายการนี้ให้สอดคล้องกันเสมอ
+      </footer>
+    </main>
+  </body>
+</html>

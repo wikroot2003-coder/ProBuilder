@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"c:\\\\Users\\\\bnng1\\\\Music\\\\MY-Add-Dev\\\\src\"\" 2>/dev/null || echo \"Directory not found \")",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

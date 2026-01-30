@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Terms of Service | KICKS ProBuilder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Prompt:wght@400;500;600&family=Sarabun:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --accent: #4f46e5;
+        --notice-bg: #fef3c7;
+        --notice-border: #f59e0b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Kanit", "Prompt", "Sarabun", system-ui, sans-serif;
+        background: #f8fafc;
+        color: var(--text);
+        line-height: 1.7;
+      }
+      main {
+        max-width: 920px;
+        margin: 32px auto 64px;
+        padding: 32px 28px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 24px 48px -42px rgba(15, 23, 42, 0.4);
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .eyebrow {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+      }
+      h1 {
+        font-size: 2.1rem;
+        margin: 0;
+      }
+      h2 {
+        margin: 24px 0 8px;
+        font-size: 1.2rem;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .notice {
+        background: var(--notice-bg);
+        border: 1px dashed var(--notice-border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+      }
+      .placeholder {
+        color: #92400e;
+        font-weight: 600;
+      }
+      ul {
+        padding-left: 20px;
+        margin: 8px 0 0;
+      }
+      footer {
+        margin-top: 32px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      @media (max-width: 600px) {
+        main {
+          margin: 0;
+          border-radius: 0;
+          border: none;
+          padding: 28px 20px 40px;
+        }
+      }
+
+      /* Terms Popup Styles */
+      .terms-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+      }
+      .terms-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      .terms-popup {
+        background: #ffffff;
+        border-radius: 16px;
+        max-width: 700px;
+        width: 90%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transform: translateY(20px);
+        transition: transform 0.3s;
+      }
+      .terms-overlay.active .terms-popup {
+        transform: translateY(0);
+      }
+      .terms-popup-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .terms-popup-header svg {
+        width: 28px;
+        height: 28px;
+        color: var(--accent);
+      }
+      .terms-popup-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      .terms-popup-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 24px;
+        font-size: 0.95rem;
+        line-height: 1.8;
+      }
+      .terms-popup-content::-webkit-scrollbar {
+        width: 8px;
+      }
+      .terms-popup-content::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      .terms-popup-content::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .terms-popup-content::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .terms-popup-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .scroll-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+      .scroll-indicator svg {
+        width: 18px;
+        height: 18px;
+        animation: bounce 1s infinite;
+      }
+      .scroll-indicator.completed {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .scroll-indicator.completed svg {
+        animation: none;
+      }
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(4px); }
+      }
+      .terms-popup-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+      .btn {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        font-family: inherit;
+      }
+      .btn-secondary {
+        background: #f1f5f9;
+        color: var(--text);
+      }
+      .btn-secondary:hover {
+        background: #e2e8f0;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: #4338ca;
+      }
+      .btn-primary:disabled {
+        background: #c7d2fe;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+      @media (max-width: 600px) {
+        .terms-popup {
+          width: 95%;
+          max-height: 90vh;
+        }
+        .terms-popup-buttons {
+          flex-direction: column;
+        }
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="eyebrow">KICKS ProBuilder</span>
+        <h1>ข้อกำหนดและเงื่อนไขการใช้งาน (Terms of Service)</h1>
+        <div class="meta">มีผลบังคับใช้ตั้งแต่วันที่: <span class="placeholder">[ระบุวันที่]</span></div>
+        <div class="meta">ปรับปรุงล่าสุดเมื่อ: <span class="placeholder">[ระบุวันที่]</span></div>
+        <div class="meta">
+          ผู้ให้บริการ: <span class="placeholder">[ชื่อบุคคล หรือ ชื่อบริษัท/นิติบุคคล]</span> ("เรา", "ผู้ให้บริการ" หรือ "KICKS ProBuilder")
+        </div>
+        <div class="meta">ติดต่อ: <span class="placeholder">[อีเมลติดต่อ]</span></div>
+        <div class="meta">เว็บไซต์: <span class="placeholder">[URL เว็บไซต์จริง]</span></div>
+        <div class="meta">
+          <a href="./privacy.html">Privacy</a> •
+          <a href="./terms.html">Terms</a> •
+          <a href="./open-source.html">Open Source</a>
+        </div>
+        <div class="meta"><a href="./">← กลับหน้าแอป</a></div>
+      </header>
+
+      <div class="notice">
+        <strong>คำเตือน:</strong> โปรดอ่านข้อกำหนดและเงื่อนไขฉบับนี้อย่างละเอียดก่อนเข้าใช้งาน การเข้าถึงหรือใช้งานบริการนี้
+        ถือว่าท่านยอมรับและตกลงที่จะผูกพันตามเงื่อนไขทั้งหมดที่ระบุไว้ หากท่านไม่ยอมรับเงื่อนไขเหล่านี้ โปรดระงับการใช้งานทันที
+      </div>
+
+      <section>
+        <h2>1) คำจำกัดความ (Definitions)</h2>
+        <ul>
+          <li>
+            <strong>"บริการ"</strong> หมายถึง เว็บไซต์ แอปพลิเคชัน เครื่องมือ KICKS ProBuilder และฟีเจอร์ที่เกี่ยวข้องทั้งหมด
+          </li>
+          <li>
+            <strong>"ผู้ใช้" หรือ "ท่าน"</strong> หมายถึง บุคคลหรือนิติบุคคลที่เข้าถึงหรือใช้งานบริการ
+          </li>
+          <li>
+            <strong>"เนื้อหาของผู้ใช้" (User Content)</strong> หมายถึง ข้อมูล รูปภาพ ข้อความ กราฟิก ไฟล์ หรือวัสดุอื่นใดที่ท่านอัปโหลด
+            นำเข้า หรือสร้างขึ้นผ่านบริการ
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>2) ขอบเขตการให้บริการและการอนุญาตสิทธิ</h2>
+        <p>
+          <strong>2.1 รูปแบบบริการ:</strong> บริการนี้เป็นเครื่องมือทางเทคนิค (Tool) สำหรับช่วยออกแบบและประมวลผลไฟล์ภาพ โดยทำงานบน
+          เว็บเบราว์เซอร์ของผู้ใช้เป็นหลัก (Client-Side) เราไม่ได้ให้บริการเก็บรักษาข้อมูลถาวร (Cloud Storage)
+        </p>
+        <p>
+          <strong>2.2 การอนุญาตให้ใช้งาน:</strong> เราอนุญาตสิทธิแบบจำกัด ไม่ผูกขาด และไม่สามารถโอนสิทธิได้ ให้แก่ท่านในการเข้าถึงและใช้งานบริการ
+          เพื่อวัตถุประสงค์ส่วนตัวหรือเชิงพาณิชย์ที่ถูกกฎหมาย ตามเงื่อนไขในเอกสารนี้
+        </p>
+      </section>
+
+      <section>
+        <h2>3) ทรัพย์สินทางปัญญา (Intellectual Property)</h2>
+        <p>
+          <strong>3.1 สิทธิของผู้ให้บริการ:</strong> โค้ดต้นฉบับ (Source Code), การออกแบบอินเทอร์เฟซ (UI/UX), โลโก้ของ KICKS ProBuilder,
+          และองค์ประกอบของซอฟต์แวร์ เป็นลิขสิทธิ์และทรัพย์สินทางปัญญาของผู้ให้บริการแต่เพียงผู้เดียว ห้ามมิให้ทำซ้ำ ดัดแปลง หรือทำวิศวกรรมย้อนกลับ
+          (Reverse Engineering)
+        </p>
+        <p>
+          <strong>3.2 สิทธิในเนื้อหาของผู้ใช้:</strong> ท่านยังคงเป็นเจ้าของลิขสิทธิ์ในรูปภาพและผลงานที่ท่านสร้างขึ้น เราไม่อ้างสิทธิความเป็นเจ้าของ
+          ในเนื้อหาที่ท่านนำเข้ามาประมวลผล
+        </p>
+      </section>
+
+      <section>
+        <h2>4) ความรับผิดชอบของผู้ใช้ (User Responsibilities)</h2>
+        <p>ท่านตกลงและรับรองว่าจะใช้งานบริการภายใต้เงื่อนไขดังต่อไปนี้:</p>
+        <ul>
+          <li>
+            <strong>ความถูกต้องของเนื้อหา:</strong> ท่านรับรองว่าท่านเป็นเจ้าของลิขสิทธิ์ หรือได้รับใบอนุญาตที่ถูกต้องตามกฎหมายในการใช้รูปภาพ โลโก้ ฟอนต์
+            หรือกราฟิกทุกชิ้นที่ท่านนำมาใช้ในบริการ
+          </li>
+          <li>
+            <strong>การใช้งานที่ผิดกฎหมาย:</strong> ห้ามใช้บริการเพื่อสร้างสื่อที่มีเนื้อหาลามกอนาจาร หมิ่นประมาท ยุยงให้เกิดความรุนแรง หรือ
+            ละเมิดกฎหมายของประเทศไทยและกฎหมายสากล
+          </li>
+          <li>
+            <strong>ความเสี่ยง:</strong> ท่านตระหนักดีว่าการนำไฟล์ผลลัพธ์ไปเผยแพร่สู่สาธารณะ เป็นความรับผิดชอบของท่านแต่เพียงผู้เดียว หากเกิดการฟ้องร้อง
+            เรื่องการละเมิดลิขสิทธิ์หรือเครื่องหมายการค้าจากบุคคลที่สาม ผู้ให้บริการไม่มีส่วนเกี่ยวข้องใด ๆ ทั้งสิ้น
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5) การปฏิเสธความรับผิด (Disclaimer of Warranties)</h2>
+        <p>
+          <strong>5.1 สภาพ "ตามที่เป็นอยู่" (As Is):</strong> บริการนี้ถูกจัดให้มี "ตามสภาพที่เป็นอยู่" และ "ตามที่มีอยู่" โดยไม่มีการรับประกันใด ๆ
+          ไม่ว่าโดยชัดแจ้งหรือโดยปริยาย (รวมถึงแต่ไม่จำกัดเพียง การรับประกันความเหมาะสมเพื่อวัตถุประสงค์เฉพาะ หรือความเสถียรของระบบ)
+        </p>
+        <p>
+          <strong>5.2 ความถูกต้องของผลลัพธ์:</strong> เนื่องจากการแสดงผลอาจแตกต่างกันไปตามอุปกรณ์และเบราว์เซอร์ ท่านมีหน้าที่ตรวจสอบความถูกต้องของไฟล์
+          (เช่น สี, ขนาด, ตัวสะกด) ก่อนนำไปใช้งานจริง เราไม่รับประกันว่าไฟล์ที่ได้จะสมบูรณ์แบบปราศจากข้อผิดพลาด
+        </p>
+      </section>
+
+      <section>
+        <h2>6) การจำกัดความรับผิด (Limitation of Liability)</h2>
+        <p>ภายในขอบเขตสูงสุดที่กฎหมายอนุญาต:</p>
+        <ul>
+          <li>
+            ผู้ให้บริการ จะไม่รับผิดชอบ ต่อความเสียหายทางตรง ทางอ้อม ความเสียหายพิเศษ หรือความเสียหายต่อเนื่องใด ๆ (รวมถึงการสูญเสียกำไร,
+            ข้อมูลสูญหาย, หรือค่าเสียโอกาสทางธุรกิจ) ที่เกิดจากการใช้งาน หรือความไม่สามารถใช้งานบริการนี้
+          </li>
+          <li>
+            ในกรณีที่ศาลตัดสินให้เรามีความรับผิด ความรับผิดรวมสูงสุดของเราต่อความเสียหายทั้งหมด จะไม่เกินจำนวนเงินที่ท่านได้ชำระให้แก่เรา
+            สำหรับการใช้บริการในช่วง 6 เดือนที่ผ่านมา (หากบริการนี้เป็นบริการฟรี ความรับผิดจะจำกัดที่ 0 บาท หรือจำนวนเงินขั้นต่ำตามที่กฎหมายกำหนด)
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>7) การชดเชยค่าเสียหาย (Indemnification)</h2>
+        <p>
+          ท่านตกลงที่จะปกป้อง ชดใช้ และดำเนินการให้ผู้ให้บริการ (รวมถึงพนักงาน และพันธมิตร) ปลอดพ้นจากความเสียหาย ข้อเรียกร้อง ค่าใช้จ่าย
+          (รวมถึงค่าทนายความ) ที่เกิดจาก:
+        </p>
+        <ul>
+          <li>การละเมิดเงื่อนไขข้อตกลงนี้ของท่าน</li>
+          <li>การละเมิดสิทธิของบุคคลที่สาม (เช่น ลิขสิทธิ์ หรือ เครื่องหมายการค้า) ผ่านเนื้อหาที่ท่านสร้างขึ้น</li>
+          <li>การใช้งานบริการในทางที่ผิดกฎหมาย</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>8) บริการของบุคคลที่สาม</h2>
+        <p>
+          บริการอาจมีการเรียกใช้ทรัพยากรจากภายนอก เช่น Google Fonts หรือ Libraries ต่าง ๆ การใช้งานทรัพยากรเหล่านั้นอยู่ภายใต้เงื่อนไขของผู้ให้บริการนั้น ๆ
+          เราไม่สามารถควบคุมและไม่รับผิดชอบต่อเนื้อหาหรือนโยบายของบุคคลที่สาม
+        </p>
+      </section>
+
+      <section>
+        <h2>9) การระงับและการยุติการใช้งาน</h2>
+        <p>เราขอสงวนสิทธิ์ในการ:</p>
+        <ul>
+          <li>แก้ไข ระงับ หรือยกเลิกบริการ (บางส่วนหรือทั้งหมด) ได้ทุกเมื่อโดยไม่ต้องแจ้งให้ทราบล่วงหน้า</li>
+          <li>ระงับการเข้าถึงของท่าน หากเราตรวจพบการละเมิดข้อตกลงนี้ หรือการกระทำที่อาจก่อให้เกิดความเสียหายต่อระบบ</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>10) กฎหมายที่ใช้บังคับและเขตอำนาจศาล</h2>
+        <p>
+          ข้อกำหนดนี้อยู่ภายใต้บังคับของกฎหมายแห่งราชอาณาจักรไทย หากเกิดข้อพิพาทที่ไม่สามารถตกลงกันได้ ให้ยื่นคำร้องต่อศาลที่มีเขตอำนาจในประเทศไทย
+        </p>
+      </section>
+
+      <section>
+        <h2>11) การแยกส่วน (Severability)</h2>
+        <p>
+          หากข้อกำหนดใดในสัญญาฉบับนี้ถูกตัดสินว่าเป็นโมฆะหรือบังคับใช้ไม่ได้ ให้ถือว่าข้อกำหนดนั้นแยกออกจากส่วนอื่น ๆ และไม่กระทบต่อความสมบูรณ์
+          ของข้อกำหนดที่เหลือซึ่งยังคงมีผลบังคับใช้
+        </p>
+      </section>
+
+      <section>
+        <h2>12) ข้อตกลงทั้งหมด</h2>
+        <p>
+          ข้อกำหนดฉบับนี้ (รวมถึงนโยบายความเป็นส่วนตัว) ถือเป็นข้อตกลงทั้งหมดระหว่างท่านและผู้ให้บริการ เกี่ยวกับการใช้บริการ และยกเลิกข้อตกลงก่อนหน้านี้ทั้งหมด
+          (ไม่ว่าจะเป็นลายลักษณ์อักษรหรือวาจา)
+        </p>
+      </section>
+
+      <footer>
+        เอกสารนี้เป็นข้อมูลทั่วไป ไม่ใช่คำแนะนำทางกฎหมายโดยตรง และควรให้ที่ปรึกษากฎหมายตรวจสอบก่อนใช้งานจริง
+      </footer>
+    </main>
+
+    <!-- Terms of Service Popup -->
+    <div class="terms-overlay active" id="termsOverlay">
+      <div class="terms-popup">
+        <div class="terms-popup-header">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+          <h2>ข้อกำหนดและเงื่อนไขการใช้งาน</h2>
+        </div>
+        <div class="terms-popup-content" id="termsContent">
+          <p><strong>โปรดอ่านข้อกำหนดและเงื่อนไขฉบับนี้อย่างละเอียดก่อนเข้าใช้งาน</strong></p>
+          <p>การเข้าถึงหรือใช้งานบริการนี้ ถือว่าท่านยอมรับและตกลงที่จะผูกพันตามเงื่อนไขทั้งหมดที่ระบุไว้ หากท่านไม่ยอมรับเงื่อนไขเหล่านี้ โปรดระงับการใช้งานทันที</p>
+
+          <h3>1) คำจำกัดความ</h3>
+          <ul>
+            <li><strong>"บริการ"</strong> หมายถึง เว็บไซต์ แอปพลิเคชัน เครื่องมือ KICKS ProBuilder และฟีเจอร์ที่เกี่ยวข้องทั้งหมด</li>
+            <li><strong>"ผู้ใช้" หรือ "ท่าน"</strong> หมายถึง บุคคลหรือนิติบุคคลที่เข้าถึงหรือใช้งานบริการ</li>
+            <li><strong>"เนื้อหาของผู้ใช้"</strong> หมายถึง ข้อมูล รูปภาพ ข้อความ กราฟิก ไฟล์ หรือวัสดุอื่นใดที่ท่านอัปโหลด นำเข้า หรือสร้างขึ้นผ่านบริการ</li>
+          </ul>
+
+          <h3>2) ขอบเขตการให้บริการและการอนุญาตสิทธิ</h3>
+          <p><strong>2.1 รูปแบบบริการ:</strong> บริการนี้เป็นเครื่องมือทางเทคนิค (Tool) สำหรับช่วยออกแบบและประมวลผลไฟล์ภาพ โดยทำงานบนเว็บเบราว์เซอร์ของผู้ใช้เป็นหลัก (Client-Side)</p>
+          <p><strong>2.2 การอนุญาตให้ใช้งาน:</strong> เราอนุญาตสิทธิแบบจำกัด ไม่ผูกขาด และไม่สามารถโอนสิทธิได้ ให้แก่ท่านในการเข้าถึงและใช้งานบริการเพื่อวัตถุประสงค์ส่วนตัวหรือเชิงพาณิชย์ที่ถูกกฎหมาย</p>
+
+          <h3>3) ทรัพย์สินทางปัญญา</h3>
+          <p><strong>3.1 สิทธิของผู้ให้บริการ:</strong> โค้ดต้นฉบับ, การออกแบบอินเทอร์เฟซ, โลโก้ของ KICKS ProBuilder และองค์ประกอบของซอฟต์แวร์ เป็นลิขสิทธิ์และทรัพย์สินทางปัญญาของผู้ให้บริการ</p>
+          <p><strong>3.2 สิทธิในเนื้อหาของผู้ใช้:</strong> ท่านยังคงเป็นเจ้าของลิขสิทธิ์ในรูปภาพและผลงานที่ท่านสร้างขึ้น</p>
+
+          <h3>4) ความรับผิดชอบของผู้ใช้</h3>
+          <ul>
+            <li><strong>ความถูกต้องของเนื้อหา:</strong> ท่านรับรองว่าท่านเป็นเจ้าของลิขสิทธิ์ หรือได้รับใบอนุญาตที่ถูกต้องตามกฎหมาย</li>
+            <li><strong>การใช้งานที่ผิดกฎหมาย:</strong> ห้ามใช้บริการเพื่อสร้างสื่อที่มีเนื้อหาลามกอนาจาร หมิ่นประมาท ยุยงให้เกิดความรุนแรง</li>
+            <li><strong>ความเสี่ยง:</strong> การนำไฟล์ผลลัพธ์ไปเผยแพร่สู่สาธารณะ เป็นความรับผิดชอบของท่านแต่เพียงผู้เดียว</li>
+          </ul>
+
+          <h3>5) การปฏิเสธความรับผิด</h3>
+          <p><strong>5.1 สภาพ "ตามที่เป็นอยู่":</strong> บริการนี้ถูกจัดให้มี "ตามสภาพที่เป็นอยู่" และ "ตามที่มีอยู่" โดยไม่มีการรับประกันใด ๆ</p>
+          <p><strong>5.2 ความถูกต้องของผลลัพธ์:</strong> ท่านมีหน้าที่ตรวจสอบความถูกต้องของไฟล์ก่อนนำไปใช้งานจริง</p>
+
+          <h3>6) การจำกัดความรับผิด</h3>
+          <p>ผู้ให้บริการจะไม่รับผิดชอบต่อความเสียหายทางตรง ทางอ้อม ความเสียหายพิเศษ หรือความเสียหายต่อเนื่องใด ๆ ที่เกิดจากการใช้งานบริการนี้</p>
+
+          <h3>7) การชดเชยค่าเสียหาย</h3>
+          <p>ท่านตกลงที่จะปกป้อง ชดใช้ และดำเนินการให้ผู้ให้บริการปลอดพ้นจากความเสียหาย ข้อเรียกร้อง ค่าใช้จ่ายที่เกิดจากการละเมิดเงื่อนไขข้อตกลงนี้</p>
+
+          <h3>8) บริการของบุคคลที่สาม</h3>
+          <p>บริการอาจมีการเรียกใช้ทรัพยากรจากภายนอก เช่น Google Fonts หรือ Libraries ต่าง ๆ การใช้งานทรัพยากรเหล่านั้นอยู่ภายใต้เงื่อนไขของผู้ให้บริการนั้น ๆ</p>
+
+          <h3>9) การระงับและการยุติการใช้งาน</h3>
+          <p>เราขอสงวนสิทธิ์ในการแก้ไข ระงับ หรือยกเลิกบริการ (บางส่วนหรือทั้งหมด) ได้ทุกเมื่อโดยไม่ต้องแจ้งให้ทราบล่วงหน้า</p>
+
+          <h3>10) กฎหมายที่ใช้บังคับ</h3>
+          <p>ข้อกำหนดนี้อยู่ภายใต้บังคับของกฎหมายแห่งราชอาณาจักรไทย หากเกิดข้อพิพาทที่ไม่สามารถตกลงกันได้ ให้ยื่นคำร้องต่อศาลที่มีเขตอำนาจในประเทศไทย</p>
+
+          <h3>11) การแยกส่วน</h3>
+          <p>หากข้อกำหนดใดในสัญญาฉบับนี้ถูกตัดสินว่าเป็นโมฆะหรือบังคับใช้ไม่ได้ ให้ถือว่าข้อกำหนดนั้นแยกออกจากส่วนอื่น ๆ</p>
+
+          <h3>12) ข้อตกลงทั้งหมด</h3>
+          <p>ข้อกำหนดฉบับนี้ (รวมถึงนโยบายความเป็นส่วนตัว) ถือเป็นข้อตกลงทั้งหมดระหว่างท่านและผู้ให้บริการเกี่ยวกับการใช้บริการ</p>
+
+          <p style="margin-top: 24px; padding: 16px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong>การยอมรับข้อกำหนด:</strong> โดยการกดปุ่ม "ยอมรับและดำเนินการต่อ" ท่านยืนยันว่าได้อ่านและเข้าใจข้อกำหนดและเงื่อนไขทั้งหมดแล้ว และตกลงที่จะผูกพันตามเงื่อนไขเหล่านี้
+          </p>
+        </div>
+        <div class="terms-popup-footer">
+          <div class="scroll-indicator" id="scrollIndicator">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" id="scrollIcon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+            </svg>
+            <span id="scrollText">กรุณาเลื่อนอ่านจนจบเพื่อยอมรับข้อกำหนด</span>
+          </div>
+          <div class="terms-popup-buttons">
+            <button class="btn btn-secondary" id="btnDecline">ปฏิเสธ</button>
+            <button class="btn btn-primary" id="btnAccept" disabled>ยอมรับและดำเนินการต่อ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const TERMS_ACCEPTED_KEY = 'kicks_terms_accepted';
+        const TERMS_VERSION = '1.0'; // เปลี่ยนเวอร์ชันเมื่อมีการแก้ไข Terms
+
+        const overlay = document.getElementById('termsOverlay');
+        const content = document.getElementById('termsContent');
+        const btnAccept = document.getElementById('btnAccept');
+        const btnDecline = document.getElementById('btnDecline');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+        const scrollIcon = document.getElementById('scrollIcon');
+        const scrollText = document.getElementById('scrollText');
+
+        let hasScrolledToBottom = false;
+
+        // แสดง Popup
+        function showPopup() {
+          overlay.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+
+        // ซ่อน Popup
+        function hidePopup() {
+          overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+
+        // ตรวจสอบการเลื่อนจนจบ
+        function checkScrollPosition() {
+          const scrollTop = content.scrollTop;
+          const scrollHeight = content.scrollHeight;
+          const clientHeight = content.clientHeight;
+
+          // ถ้าเลื่อนถึงจุดที่เหลืออีก 50px หรือน้อยกว่า ถือว่าอ่านจบ
+          if (scrollTop + clientHeight >= scrollHeight - 50) {
+            hasScrolledToBottom = true;
+            btnAccept.disabled = false;
+            scrollIndicator.classList.add('completed');
+            scrollIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />';
+            scrollText.textContent = 'คุณได้อ่านข้อกำหนดครบถ้วนแล้ว';
+          }
+        }
+
+        // Event Listeners
+        content.addEventListener('scroll', checkScrollPosition);
+
+        btnAccept.addEventListener('click', function() {
+          if (hasScrolledToBottom) {
+            localStorage.setItem(TERMS_ACCEPTED_KEY, TERMS_VERSION);
+            hidePopup();
+          }
+        });
+
+        btnDecline.addEventListener('click', function() {
+          // กลับไปหน้าแอปหลักหรือแสดงข้อความ
+          if (confirm('หากปฏิเสธข้อกำหนด ท่านจะไม่สามารถใช้งานบริการได้\n\nต้องการปฏิเสธหรือไม่?')) {
+            globalThis.location.href = './';
+          }
+        });
+
+        // ป้องกันการปิด Popup โดยคลิกนอก
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) {
+            // ไม่ทำอะไร - บังคับให้ต้องกดปุ่ม
+          }
+        });
+
+        // เริ่มต้น: แสดง Popup ทุกครั้งที่เข้าหน้า Terms
+        showPopup();
+
+        // ตรวจสอบครั้งแรกว่าเนื้อหาสั้นพอที่จะไม่ต้องเลื่อนหรือไม่
+        setTimeout(function() {
+          if (content.scrollHeight <= content.clientHeight) {
+            // เนื้อหาสั้น ไม่ต้องเลื่อน
+            hasScrolledToBottom = true;
+            btnAccept.disabled = false;
+            scrollIndicator.classList.add('completed');
+            scrollIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />';
+            scrollText.textContent = 'คุณได้อ่านข้อกำหนดครบถ้วนแล้ว';
+          }
+        }, 100);
+      })();
+    </script>
+  </body>
+</html>
